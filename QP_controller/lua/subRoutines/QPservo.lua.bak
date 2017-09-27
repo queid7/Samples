@@ -1,0 +1,1907 @@
+require('subRoutines/ConvexHull2D')
+require("module")
+HessianQuadratic.add=QuadraticFunctionHardCon.add
+
+--_checkpoints=array() _count=0
+
+function checkLCP(x, CE, ce0, CI, ci0, LCP, lcp0,lcp_s,lcp_e)
+	
+	local eq
+	if CE:rows()>0 then
+		eq=CE*x:column()+ce0:column()
+	else
+		eq=CT.vec(0)
+	end
+	local iq=CI*x:column()+ci0:column()
+	print('eq:', eq:minimum(), eq:maximum())
+	print('iq:', iq:minimum(), iq:maximum())
+	local lcp_v=vectorn(lcp_e-lcp_s)
+	local lambda=x:range(lcp_s, lcp_e)
+	local acc=LCP*lambda:column()+lcp0
+	print('acc:', acc:minimum(), acc:maximum())
+	print('lambda:', lambda:minimum(), lambda:maximum())
+	for i=0, lcp_v:size()-1 do
+		lcp_v:set(i, acc(i,0)*lambda(i))
+	end
+	local iMax=lcp_v:argMax()
+	print('acc*lambda:', lcp_v:minimum(), lcp_v:maximum(), iMax, acc(iMax,0), lambda(iMax))
+end
+-- add objective function term weight*( x_i -value)^2
+function HessianQuadratic:addD(weight, index, value)
+	local sqw=math.sqrt(weight)
+	local i=CT.ivec(index)
+	local v=CT.vec(sqw,sqw*-1*value)
+	self:addSquared(i,v)
+end
+function HessianQuadratic:addSquaredW(weight, i, v)
+	self:addSquared(i, math.sqrt(weight)*v)
+end
+-- minimize weight*(M * x[si:ei) +b)^2
+function HessianQuadratic:addV(weight, M, si, ei,b)
+	local i=CT.colon(si,ei,1)
+	assert(M:cols()==ei-si)
+	local v=vectorn(M:cols()+1)
+	local sqw=math.sqrt(weight)
+	for j=0,M:rows()-1 do
+		v:range(0,v:size()-1):assign(M:row(j))
+		v:set(v:size()-1, b(j,0))
+		v:rmult(sqw)
+		self:addSquared(i,v)
+	end
+	--##dos
+if g_debugOneStep then --##dos
+g_debugOneStep:pushBack({"addv",self.R:copy()}) --##dos
+end 
+end 
+
+function HessianQuadratic:addVselective(weight, M, si, ei,b, index)
+	local i=CT.colon(si,ei,1)
+	assert(M:cols()==ei-si)
+	local v=vectorn(M:cols()+1)
+	local sqw=math.sqrt(weight)
+	for j=0,index:size()-1 do
+		v:range(0,v:size()-1):assign(M:row(index(j)))
+		v:set(v:size()-1, b(index(j),0))
+		v:rmult(sqw)
+		self:addSquared(i,v)
+	end
+	--##dos
+if g_debugOneStep then --##dos
+g_debugOneStep:pushBack({"vsel",self.R:copy()}) --##dos
+end 
+end 
+function HessianQuadratic:addComplementory(weight,si,ei, M,q)
+	-- seems to be buggy
+	-- zT(Mz + q)
+	-- where z is x[si:ei)
+	
+	-- xT(Nx + q)
+
+	-- 0.5H=M -> H=2M
+	self.H:range(si,ei,si,ei):radd(M*(2*weight))
+	self.R:range(si,ei):rsub(q*weight)
+end
+
+function HessianQuadratic:addComplementory3(weight, n, si1,ei1, M_S2, S2q)
+	-- seems to be buggy
+	-- minimize (S1*x)'*(M*S2*x+S2*q) where S1, S2 is selection matrices
+	-- = x'*S1'*M*S2*x+S1'S2*q 
+
+	-- e.g. x=(x1, x2, x3)' -> S1= (0 1 0;0 0 1)
+	local function selectionMatrix(n, si, ei)
+		local S=matrixn(ei-si, n)
+		S:setAllValue(0)
+		S:sub(0,0,si,ei):identity()
+		return S
+	end
+
+	-- M*   S2   *      x           = M* ddq
+	-- M*[I 0 0] * [ddq;tau;lambda] = ddq
+	 
+	local S1=selectionMatrix(n, si1, ei1)
+	local S1tM_S2=matrixn()
+	local S1tS2q=matrixn()
+	S1tM_S2:multAtB(S1,M_S2)
+	S1tS2q:multAtB(S1, S2q)
+	self.H:radd(S1tM_S2*(2*weight))
+	self.R:radd(S1tS2q:column(0)*weight)
+end
+function Physics.ContactBasis:__tostring()
+	return string.format("%d %d (%s) n:(%s) f:%d %d %d\n", self.ibody, self.ibone,tostring( self.globalpos), tostring(self.normal), self.frictionNormal:size(), self.globalIndex, self.globalFrictionIndex)
+end
+function Physics.Vec_ContactBasis:__tostring()
+	local out=""
+	for i=0, self:size()-1 do
+		out=out..i..": "..tostring(self(i))
+	end
+	return out
+end
+
+-- PDServo class
+--class 'QPservo'
+QPservo=LUAclass()
+
+function QPservo:setCoef(dofInfo,kp, kd, tgtVelScale, k_scale)
+	kp:setSize(dofInfo:numDOF())
+	kp:setAllValue(k_p)
+	kd:setSize(dofInfo:numDOF())
+	kd:setAllValue(k_d)
+	tgtVelScale:setSize(dofInfo:numDOF())
+	tgtVelScale:setAllValue(1)
+	
+	if self.excludeRoot then
+		-- exclude root joint
+		kp:range(0,7):setAllValue(0)
+		kd:range(0,7):setAllValue(0)
+	end
+	
+	--print("initQPservo:"..dofInfo:skeleton():bone(1):name())
+	for i=2,dofInfo:skeleton():numBone()-1 do
+		local bone=dofInfo:skeleton():bone(i)
+		local vbone=bone:treeIndex()
+		local nJoint=dofInfo:numDOF(vbone)
+		--      print("initQPservo:"..bone:name())
+		for j=0, nJoint-1 do
+			
+			local dofIndex=dofInfo:DOFindex(vbone,j)
+			
+			kp:set(dofIndex, k_p*k_scale.default[1])
+			kd:set(dofIndex, k_d*k_scale.default[2])
+			tgtVelScale:set(dofIndex, k_scale.default[3])
+
+			if bone:voca()==MotionLoader.LEFTANKLE or bone:voca()==MotionLoader.RIGHTANKLE then
+				if k_scale.ankle~=nil then
+					kp:set(dofIndex, k_p*k_scale.ankle[1])
+					kd:set(dofIndex, k_d*k_scale.ankle[2])
+					tgtVelScale:set(dofIndex, k_scale.ankle[3])
+				end
+			elseif bone:voca()==MotionLoader.LEFTWRIST or bone:voca()==MotionLoader.RIGHTWRIST then
+				if k_scale.wrist~=nil then
+					kp:set(dofIndex, k_p*k_scale.wrist[1])
+					kd:set(dofIndex, k_d*k_scale.wrist[2])
+					tgtVelScale:set(dofIndex, k_scale.wrist[3])
+				end
+			elseif bone:voca()==MotionLoader.LEFTCOLLAR or bone:voca()==MotionLoader.RIGHTCOLLAR then
+				if k_scale.collar~=nil then
+					kp:set(dofIndex, k_p*k_scale.collar[1])
+					kd:set(dofIndex, k_d*k_scale.collar[2])
+					tgtVelScale:set(dofIndex, k_scale.collar[3])
+				end
+			elseif bone:voca()==MotionLoader.LEFTSHOULDER or bone:voca()==MotionLoader.RIGHTSHOULDER then
+				if k_scale.shoulder~=nil then
+					kp:set(dofIndex, k_p*k_scale.shoulder[1])
+					kd:set(dofIndex, k_d*k_scale.shoulder[2])
+					tgtVelScale:set(dofIndex, k_scale.shoulder[3])
+				end
+			elseif bone:voca()==MotionLoader.LEFTELBOW or bone:voca()==MotionLoader.RIGHTELBOW then
+				if k_scale.elbow~=nil then
+					kp:set(dofIndex, k_p*k_scale.elbow[1])
+					kd:set(dofIndex, k_d*k_scale.elbow[2])
+					tgtVelScale:set(dofIndex, k_scale.elbow[3])
+				end
+			elseif bone:voca()==MotionLoader.LEFTKNEE or bone:voca()==MotionLoader.RIGHTKNEE then
+				if k_scale.knee~=nil then
+					kp:set(dofIndex, k_p*k_scale.knee[1])
+					kd:set(dofIndex, k_d*k_scale.knee[2])
+					tgtVelScale:set(dofIndex, k_scale.knee[3])
+				end
+			elseif bone:voca()==MotionLoader.LEFTHIP or bone:voca()==MotionLoader.RIGHTHIP then
+				if k_scale.hip~=nil then
+					kp:set(dofIndex, k_p*k_scale.hip[1])
+					kd:set(dofIndex, k_d*k_scale.hip[2])
+					tgtVelScale:set(dofIndex, k_scale.hip[3])
+				end
+			elseif bone:voca()==MotionLoader.CHEST then
+				if k_scale.chest~=nil then
+					kp:set(dofIndex, k_p*k_scale.chest[1])
+					kd:set(dofIndex, k_d*k_scale.chest[2])
+					tgtVelScale:set(dofIndex, k_scale.chest[3])
+				end
+			elseif bone:voca()==MotionLoader.CHEST2 then
+				if k_scale.chest2~=nil then
+					kp:set(dofIndex, k_p*k_scale.chest2[1])
+					kd:set(dofIndex, k_d*k_scale.chest2[2])
+					tgtVelScale:set(dofIndex, k_scale.chest2[3])
+				end
+			elseif bone:voca()==MotionLoader.NECK then
+				if k_scale.neck~=nil then
+					kp:set(dofIndex, k_p*k_scale.neck[1])
+					kd:set(dofIndex, k_d*k_scale.neck[2])
+					tgtVelScale:set(dofIndex, k_scale.neck[3])
+				end
+			elseif bone:voca()==MotionLoader.HEAD then
+				if k_scale.head~=nil then
+					kp:set(dofIndex, k_p*k_scale.head[1])
+					kd:set(dofIndex, k_d*k_scale.head[2])
+					tgtVelScale:set(dofIndex, k_scale.head[3])
+				end
+			end
+			if str_include(bone:name(), "toes") then
+				local dofIndex=dofInfo:DOFindex(vbone,j)
+				if k_scale.toes~=nil then
+					kp:set(dofIndex, k_p*k_scale.toes[1])
+					kd:set(dofIndex, k_d*k_scale.toes[2])
+					tgtVelScale:set(dofIndex, k_scale.toes[3])
+				end
+
+			end
+
+			if dofInfo:DOFtype(vbone, j)==MotionDOFinfo.SLIDE then
+				local dofIndex=dofInfo:DOFindex(vbone,j)
+				kp:set(dofIndex, k_p_slide)
+				kd:set(dofIndex, k_d_slide)
+				tgtVelScale:set(dofIndex, 0)
+			end
+		end
+	end
+end
+
+function QPservo:updateCoef()
+	local dofInfo=self.dofInfo
+
+	k_p=1
+	k_d=1
+	k_p_slide=5
+	k_d_slide=5
+
+	-- self:setIDGain(dofInfo:skeleton(), self.kp_id, self.kd_id, k_p, k_d, k_p_slide or k_p*5, k_d_slide or k_d*5)
+	self.weight=vectorn()
+	local bigJointsAccCoef=useCase.bigJointsAccCoef or 1
+	model.k_scale_id.hip={bigJointsAccCoef,bigJointsAccCoef,1}
+	model.k_scale_id.chest={bigJointsAccCoef,bigJointsAccCoef,1}
+	--model.k_scale_id.ankle={0.5,0.5,1}
+	self:setCoef(dofInfo, self.kp_id, self.kd_id, self.weight, model.k_scale_id)
+
+	self.weight2=vectorn()
+
+	local temp=vectorn()
+
+	local bigJointsTorqueCoef=useCase.bigJointsTorqueCoef or 1
+	local k_torque_bound={
+		default={1,1,1}, 
+		hip={bigJointsTorqueCoef,1,1},
+		chest={bigJointsTorqueCoef,1,1},
+		--ankle={1/bigJointsTorqueCoef,1,1},
+		--ankle={0.5,1,1},
+	}
+
+	self:setCoef(dofInfo, self.weight2,temp,temp, k_torque_bound)
+
+end
+
+function QPservo:computeContact(sim, swingFoot)
+	local simulator=self.simulator
+	self.contactHull=nil
+	local cf=Physics.Vec_CFinfo()
+	cf:assign(simulator:queryContactAll())
+
+	local cstate=self.state
+	self.contactHull=ConvexHull2D()
+	local skel=self.dofInfo:skeleton()
+	local lfoot=skel:getTreeIndexByVoca(MotionLoader.LEFTANKLE)
+	local ltoes=skel:getTreeIndexByVoca(MotionLoader.LEFTTOES)
+	local rfoot=skel:getTreeIndexByVoca(MotionLoader.RIGHTANKLE)
+	local rtoes=skel:getTreeIndexByVoca(MotionLoader.RIGHTTOES)
+
+	local lhand=skel:getTreeIndexByVoca(MotionLoader.LEFTWRIST)
+	local rhand=skel:getTreeIndexByVoca(MotionLoader.RIGHTWRIST)
+	local actualContact={L=false, R=false,LH=false, RH=false}
+
+	for i=0, cf:size()-1 do
+		if cf(i).chara==0 then
+			local ci=cf(i)
+
+			local ti=ci.bone:treeIndex()
+			local isLfoot=false
+			local isRfoot=false
+			if (ti==lfoot or ti==ltoes) then 
+				isLfoot=true 
+				actualContact.L=true 
+			end
+			if (ti==rfoot or ti==rtoes) then 
+				isRfoot=true 
+				actualContact.R=true 
+			end
+			if ti==lhand then actualContact.LH=true end
+			if ti==rhand then actualContact.RH=true end
+			
+			local frame=simulator:getWorldState(0):globalFrame(ci.bone)
+			local globalPos=frame:toGlobalPos(ci.p)
+
+			if not (swingFoot=="L" and actualContact.L ) and not (swingFoot=="R" and actualContact.R) then
+				self.contactHull:addVector3(globalPos)
+			end
+		end
+	end
+	--print(simulator:getWorldState(0):globalFrame(lfoot).translation)
+	--print(simulator:getNumContactLinkPairs())
+	--printTable(actualContact)
+
+	cstate.actualContact=actualContact
+	if actualContact.L==false and actualContact.R==false 
+	and actualContact.LH==false and actualContact.RH==false then
+		cstate.flightPhase=true
+	else
+		cstate.flightPhase=false
+	end
+
+	-- keeps track of contact changes
+	if not cstate.previousFlightPhase and cstate.flightPhase then
+		cstate.supportPhaseElapsed=0
+	elseif cstate.previousFlightPhase and not cstate.flightPhase then
+		cstate.flightPhaseElapsed=0
+	end
+
+	if cstate.flightPhase then
+		cstate.flightPhaseElapsed=cstate.flightPhaseElapsed+1
+	else
+		cstate.supportPhaseElapsed=cstate.supportPhaseElapsed+1
+	end
+
+	cstate.previousFlightPhase=cstate.flightPhase
+end
+
+function QPservo:__init(dofInfo, timestep,integrator, simulator)
+	self.simulator=simulator
+	self.dtinv=1/timestep
+	self.invfricCoef=useCase.invFricCoef or 0.5
+	-- settings
+	self.useMLCPmatFromAIST=false
+	self.excludeRoot=useCase.excludeRoot
+	self.excludeNormalBasis=false
+	self.giOffset=0
+	-- defalt
+	self.state={previousFlightPhase=false, flightPhase=false, supportPhaseElapsed=100, flightPhaseElapsed=0, prevContact={}, contact={}, contactDuration={}, contactClass={}}
+	self.numCLinks=simulator:getNumAllLinkPairs()
+	local index=intvectorn()
+	simulator:getContactLinkBoneIndex(0,index)
+
+	--_checkpoints:pushBack(deepCopyTable({'clinks', self.numCLinks, index}))
+	self.bi={}
+	local bi=self.bi
+	do 
+		bi.L=simulator:skeleton(0):getTreeIndexByVoca(MotionLoader.LEFTANKLE)
+		bi.R=simulator:skeleton(0):getTreeIndexByVoca(MotionLoader.RIGHTANKLE)
+		bi.LH=simulator:skeleton(0):getTreeIndexByVoca(MotionLoader.LEFTWRIST)
+		bi.RH=simulator:skeleton(0):getTreeIndexByVoca(MotionLoader.RIGHTWRIST)
+		assert(bi.L~=-1)
+	end
+
+	do
+		-- set footLoop jacobian tools
+		local footLoop={}
+		local skel=simulator:skeleton(0)
+		footLoop.skel= MainLib.VRMLloaderView(skel,skel:getBoneByVoca(MotionLoader.LEFTANKLE), vector3(0,0,0))
+		MotionLoader.setVoca(footLoop.skel, model.bones)
+		footLoop.sim= Physics.DynamicsSimulator_gmbs(true)
+		footLoop.sim:registerCharacter(footLoop.skel)
+		footLoop.sim:init(timestep, Physics.DynamicsSimulator.EULER)
+		footLoop.Rindex=footLoop.skel:getTreeIndexByVoca(MotionLoader.RIGHTANKLE)
+		self.footLoop=footLoop
+	end
+
+	for i=1,self.numCLinks do
+		self.state.prevContact[i]=false
+		self.state.contact[i]=false
+		self.state.contactDuration[i]=0
+
+		for k,isL in ipairs({'L','R','LH','RH'}) do
+			if index(i-1)==bi[isL] or index(i-1)==bi[isL]+1 then
+				self.state.contactClass[i]=isL
+			end
+		end
+		if self.state.contactClass[i]==nil then
+			self.state.contactClass[i]='O'
+		end
+	end
+	self.state.aggContactForce=vector3(0,0,0)
+
+	--_checkpoints:pushBack(deepCopyTable({'state', state}))
+	self.theta=vectorn()
+	self.dtheta=vectorn()
+	-- HD servo
+	self.theta_d=vectorn() -- desired q
+	self.dtheta_d=vectorn() -- desired dq
+	self.ddtheta_d=vectorn() -- desired ddq
+
+	-- PD servo
+	--self.theta_d_pd=vectorn()
+
+	self.desiredacceleration=vectorn()
+	self.controlforce=vectorn()
+	self.kp=vectorn()
+	self.kd=vectorn()
+	self.kp_id=vectorn()
+	self.kd_id=vectorn()
+
+	self.tgtVelScale=vectorn()
+	self.mask_slide=vectorn()
+	
+
+	-- lleg+rleg+upperbody=all
+	self.mask_lleg=vectorn() -- excluding sliding joints
+	self.mask_rleg=vectorn() -- excluding sliding joints
+	self.mask_upperbody=vectorn()
+	self.scale_lleg=1
+	self.scale_rleg=1
+	self.scale_upperbody=1
+	
+	self.muscleActiveness=0.3
+	self.kp_weight=1.0 -- use kp_active(1) or kp_passive(0)
+	self.kd_weight=1.0 -- use kd_active(1) or kd_passive(0)
+	self.mask_slide:setSize(dofInfo:numDOF())
+	self.mask_slide:setAllValue(0)
+	self.mask_lleg:setSize(dofInfo:numDOF())
+	self.mask_rleg:setSize(dofInfo:numDOF())
+	self.mask_upperbody:setSize(dofInfo:numDOF())
+	self.mask_lleg:setAllValue(0)
+	self.mask_rleg:setAllValue(0)
+	self.mask_upperbody:setAllValue(1)
+
+	self.dofInfo=dofInfo
+	self:updateCoef()
+	print ("kp=",self.kp)
+	print ("kd=",self.kd)
+
+	local skel=dofInfo:skeleton()
+
+	local lhip=skel:getBoneByVoca(MotionLoader.LEFTHIP)
+	local rhip=skel:getBoneByVoca(MotionLoader.RIGHTHIP)
+
+	self.lkneeDOF=dofInfo:DOFindex(skel:getBoneByVoca(MotionLoader.LEFTKNEE):treeIndex(),0)
+	self.rkneeDOF=dofInfo:DOFindex(skel:getBoneByVoca(MotionLoader.RIGHTKNEE):treeIndex(),0)
+	local function setClampMax(clampForce, clampTorque)
+		local clampMax=vectorn(dofInfo:numDOF())
+		clampMax:setAllValue(0)
+		for i=2,skel:numBone()-1 do
+			local bone=skel:bone(i)
+			local vbone=bone:treeIndex()
+			local nJoint=dofInfo:numDOF(vbone)
+			for j=0, nJoint-1 do
+				local dofIndex=dofInfo:DOFindex(vbone,j)
+				if dofInfo:DOFtype(vbone, j)==MotionDOFinfo.SLIDE then
+					local dofIndex=dofInfo:DOFindex(vbone,j)
+					self.mask_slide:set(dofIndex, 1)
+					clampMax:set(dofIndex, clampForce)
+				else
+					clampMax:set(dofIndex, clampTorque)
+
+					if bone:isDescendent(lhip) then
+						self.mask_lleg:set(dofIndex,1)
+						self.mask_upperbody:set(dofIndex,0)
+					elseif bone:isDescendent(rhip) then
+						self.mask_rleg:set(dofIndex,1)
+						self.mask_upperbody:set(dofIndex,0)
+					end
+
+
+				end
+			end
+		end   
+		return clampMax
+	end
+
+	local clampTorque=model.clampTorqueID or 400
+	local clampForce=model.clampForceID or 4000
+
+	self.clampMaxID=setClampMax(clampForce, clampTorque)
+
+	clampTorque=model.clampTorque or 800
+	clampForce=model.clampForce or 8000
+
+	self.clampMax=setClampMax(clampForce, clampTorque)
+	
+	self.clampMin=self.clampMax*-1
+	self.clampMinID=self.clampMaxID*-1
+
+	self.numActualDOF=dofInfo:numActualDOF()
+	self.workspace={}
+	local w=self.workspace
+	w.M=matrixn()
+	w.b=vectorn(self.numActualDOF)
+	w.JtV=matrixn()
+	w.J=matrixn()
+	w.dotJ=matrixn()
+	w.V=matrixn()
+	w.dotV=matrixn()
+	w.V2=matrixn()
+	w.dotV2=matrixn()
+	w.Mlcp=matrixn()
+	w.Mlcp_bias=vectorn()
+	w.CE=matrixn()
+	w.ce0=vectorn()
+	w.CI=matrixn()
+	w.ci0=vectorn()
+	w.x=vectorn()
+	w.x_lcp=vectorn()
+	w.CElcp=matrixn()
+	w.ce0lcp=vectorn()
+	w.CIinvM=matrixn()
+
+	return o
+end
+
+function QPservo:initQPservo(startf, endf,motionDOF, dmotionDOF, ddmotionDOF)--, motionDOF_pdtarget)
+
+	self.startFrame=startf
+	self.endFrame=endf
+	self.currFrame=startf
+	self.deltaTime=0
+	self.motionDOF=motionDOF
+	self.dmotionDOF=dmotionDOF
+	self.ddmotionDOF=ddmotionDOF
+	--self.motionDOF_pdtarget=motionDOF_pdtarget or motionDOF
+
+end
+
+-- generate FBtorque
+function QPservo:generateTorque(sim, maxForce)
+	local simulator=self.simulator
+	self.currFrame=(simulator:currentTime()+self.deltaTime)*model.frame_rate+self.startFrame
+	--print(self.currFrame) -- extremely slow.
+	if self.currFrame>self.endFrame-1 then
+		self:sampleCurrPose(simulator)
+	end
+	
+	self:_generateTorque(simulator, self.currFrame, maxForce)
+	return true
+end
+function QPservo:_calcDesiredAcceleration()
+	local state=self.theta
+	local dstate=self.dtheta
+	self.desiredacceleration:setSize(self.motionDOF:numDOF())
+	
+	--   self.desiredacceleration:assign(self.kp*(self.theta_d-state)+
+	--			 self.kd*(self.dtheta_d-dstate))
+
+	
+	local delta=self.theta_d-state
+	MainLib.VRMLloader.projectAngles(delta) -- [-pi, pi]
+
+--	do
+--		local mLoader=self.dofInfo:skeleton()
+--		local rhumerusIndex=mLoader:getTreeIndexByName('rhumerus')
+--		local start_rh=mLoader.dofInfo:startR(rhumerusIndex)
+--		print('RH:'..tostring(self.theta_d:range(start_rh, start_rh+3))..','..tostring(state:range(start_rh, start_rh+3))..
+--		tostring(delta:range(start_rh, start_rh+3))..','..
+--		tostring(self.dtheta_d:range(start_rh, start_rh+3))..','..
+--		tostring(dstate:range(start_rh, start_rh+3))
+--		)
+--	end
+	local V=MotionDOF.rootTransformation(state):twist(MotionDOF.rootTransformation(self.theta_d),1)
+
+	delta:setVec3(0, V.v)
+	delta:set(3,0)
+	delta:setVec3(4, V.w)
+
+	--self.desiredacceleration:setAllValue(0)
+	self.dtheta_d:range(0,7):setAllValue(0)
+	self.desiredacceleration:assign(self.kp_id*delta*useCase.k_p_ID +  self.kd_id*(self.dtheta_d*(useCase.QPservoDScaleCoef or 1.0)-dstate)*useCase.k_d_ID)
+	--self.desiredacceleration:range(0,7):setAllValue(0)
+	local accClamp=useCase.desiredAccThr or 400
+	self.desiredacceleration:smoothClamp(-accClamp, accClamp)
+
+	self.ddtheta_d:range(0,7):setAllValue(0)
+	self.desiredacceleration:radd(self.ddtheta_d)
+	--print(self.ddtheta_d)
+	--self.desiredacceleration:clamp(-400, 400)
+
+--##dos
+if g_debugOneStep then --##dos
+--##dos
+g_debugOneStep:pushBack({"theta",self.theta:copy()}) --##dos
+g_debugOneStep:pushBack({"dtheta",self.dtheta:copy()}) --##dos
+g_debugOneStep:pushBack({"dtheta_d",self.dtheta_d:copy()}) --##dos
+g_debugOneStep:pushBack({"kp_id",self.kp_id:copy()}) --##dos
+g_debugOneStep:pushBack({"kd_id",self.kd_id:copy()}) --##dos
+g_debugOneStep:pushBack(useCase.QPservoDScaleCoef ) --##dos
+g_debugOneStep:pushBack({"delta",delta:copy()}) --##dos
+g_debugOneStep:pushBack({"ddtheta_d",self.ddtheta_d:copy()}) --##dos
+g_debugOneStep:pushBack({"desiredAcc",self.desiredacceleration:copy()}) --##dos
+end
+end
+
+
+-- deprecated: use _calcDesiredAcceleration
+function QPservo:calcDesiredAcceleration(sim, frame, state, dstate)
+
+	local simulator=self.simulator
+
+	--[[ continuous sampling ]]--
+	--   print("theta",self.theta)
+
+	self:sampleTargetPoses(frame)
+
+	--   self.dtheta_d:setAllValue(0)
+	self:_calcDesiredAcceleration()
+end
+
+function QPservo:sampleCurrPose(sim)
+	local simulator=self.simulator
+	simulator:getLinkData(0, Physics.DynamicsSimulator.JOINT_VALUE, self.theta)
+	simulator:getLinkData(0, Physics.DynamicsSimulator.JOINT_VELOCITY, self.dtheta)
+end
+function QPservo:sampleTargetPoses( frame)
+	-- desired (target) pose
+	self.motionDOF:samplePose(frame, self.theta_d)
+--	self.motionDOF_pdtarget:samplePose(frame, self.theta_d_pd)
+	self.dmotionDOF:sampleRow(frame, self.dtheta_d)
+	self.ddmotionDOF:sampleRow(frame, self.ddtheta_d)
+end
+
+function QPservo:stepSimul(sim, impulse)
+	local simulator=self.simulator
+	if false then
+		simulator:setLinkData(0, Physics.DynamicsSimulator.JOINT_TORQUE, self.controlforce)
+		simulator:stepSimulation()
+	elseif false then
+		-- forward dynamics
+		local w=self.workspace
+		local tau=vectorn(w.b:size())
+		tau:setAllValue(0)
+		if w.link_pair_count >0 then
+			local solution=vectorn()
+			simulator:getLCPsolution(solution)
+			tau:assign((w.JtV*solution:column()):column(0))
+		end
+		tau:radd(self.controlforce:range(1,self.controlforce:size()))
+		local nb=w.b*-1+tau
+		local ddq=w.M:LeftDiv(nb:column()):column(0)
+		simulator:stepKinematic(ddq, tau, true)
+	elseif false then
+		-- forward dynamics using QP solution
+		local w=self.workspace
+		local tau=vectorn(w.b:size())
+		tau:setAllValue(0)
+		if w.link_pair_count >0 then
+			local solution=w.x:range(self.numActualDOF*2, w.x:size())
+			tau:assign((w.JtV*solution:column()):column(0))
+		end
+		tau:radd(self.controlforce:range(1,self.controlforce:size()))
+		local nb=w.b*-1+tau
+		local ddq=w.M:LeftDiv(nb:column()):column(0)
+		
+		--local lambda=w.x:range(self.numActualDOF*2, w.x:size())
+		--if lambda:size()>0 then
+		--	local tau2=w.x:range(self.numActualDOF, self.numActualDOF*2)
+		--	print('tau err:', tau, tau2, (w.JtV*lambda:column()):column(0))
+		--	local ddq2=w.x:range(0, self.numActualDOF)
+		--	print('ddq err:', ddq-ddq2)
+		--	dbg.console()
+		--end
+
+		simulator:stepKinematic(ddq, tau, true)
+	else -- use QP solution directly
+		local qp=self.qp
+		local w=self.workspace
+		local numActualDOF=self.numActualDOF
+		--##dos
+if g_debugOneStep then --##dos
+g_debugOneStep:pushBack({"qpR",qp.H:copy(), qp.R:copy()}) --##dos
+end
+		
+		if impulse then
+			local J=matrixn()
+			simulator:calcJacobian(0,impulse.chest:treeIndex(),J)
+			local tf=simulator:getWorldState(0):globalFrame(impulse.chest)
+			-- refer to DynamicsSimulator_gmbs.cpp:calcContactjacobianAll
+			local dAd=matrixn(6,6)
+			dAd:setSize(6,6)
+			dAd:setAllValue(0)
+			dAd:diag():setAllValue(1)
+			dAd:sub(0,3,3,6):assign(CT.skew(tf:toGlobalPos(impulse.chest:localCOM())*-1))
+			local lf=impulse.lf
+			local mlf=CT.mat(6,1,0,0,0,lf.x, lf.y, lf.z)
+			print(lf)
+			local tau=matrixn()
+			tau:multAtB(J,dAd*liegroup.dAd(tf:inverse())*mlf)
+
+			w.ce0:range(0,numActualDOF):rsub(tau:column(0))
+		end
+		Eigen.solveQuadprog(qp, w.CE, w.ce0, w.CI, w.ci0, w.x)
+		--qp:solveQuadprog(w.CE, w.ce0, w.CI, w.ci0, w.x, true)
+		--_checkpoints:pushBack(deepCopyTable({'quadprog', w.CE, w.ce0, w.CI, w.ci0, w.x}))
+
+		if false then
+			if _count==1 then
+				if util.isFileExist('_checkpoints.tbl') then
+					tbl2=util.loadTable('_checkpoints.tbl')
+					util.compareTable(_checkpoints, tbl2)
+				else
+					util.saveTable(_checkpoints, '_checkpoints.tbl')
+				end
+				dbg.console()
+			end
+			_count=_count+1
+		end
+
+		if useCase.enforceLCPcondition and w.link_pair_count>0 then
+
+			-- enforce LCP condition
+			local ddq=w.x:range(0, self.numActualDOF)
+			local tau=w.x:range(self.numActualDOF, self.numActualDOF*2)
+			local lambda=w.x:range(self.numActualDOF*2, w.x:size())
+			local numActualDOF=ddq:size()
+			local cdim=lambda:size()
+			local totalDIM=numActualDOF*2+cdim -- ddq, tau, lambda
+
+			w.CElcp:setSize(numActualDOF*2, totalDIM)
+			w.CElcp:sub(0, numActualDOF,0,0):assign(w.CE:sub(0,numActualDOF,0,0))
+			-- constraint tau
+			w.CElcp:sub(numActualDOF, numActualDOF*2):setAllValue(0)
+			w.CElcp:sub(numActualDOF, numActualDOF*2, numActualDOF, numActualDOF*2):identity()
+			w.ce0lcp:setSize(numActualDOF*2)
+			w.ce0lcp:range(0,numActualDOF):assign(w.b)
+			w.ce0lcp:range(numActualDOF, numActualDOF*2):assign(tau*-1)
+			local mCI=w.CI:sub(0, w.VtJ:rows(), 0, numActualDOF)
+			local mCI0=w.ci0:range(0, w.VtJ:rows()):column()
+
+			--acc at contacts=mCI*ddq+mCI0
+			--               =mCI*invM*(b+JtV*lambda+tau)+mCI0
+			local invM=CT.inverse(w.M)
+			w.CIinvM:mult(mCI, invM)
+			local mLCP=w.CIinvM*w.JtV
+			local mLCP0=w.CIinvM*((tau-w.b):column())+mCI0
+			if false then -- debug
+				local acc = mCI*ddq:column()+mCI0
+				local acc2= mLCP*lambda:column()+mLCP0
+				dbg.console() -- check acc==acc2
+			end
+			assert(w.VtJ:rows()==cdim)
+			local ddql, taul, lambdal, accl
+			if false then
+				-- use full dimensional system : incorrect solution 
+				local lcp=HessianQuadratic(totalDIM)
+				-- minimize complementory cost (minimize (lambda *  (a*ddq+b)))
+				for i=0,numActualDOF-1 do
+					lcp:addD(0.1,i, ddq(i))
+					lcp:addD(0.1,i+numActualDOF, tau(i))
+				end
+				for i=0, cdim -1 do
+					lcp:addD(0.1,i+numActualDOF*2, lambda(i))
+				end
+				lcp:addComplementory(500, numActualDOF*2,numActualDOF*2+cdim, mLCP, mLCP0:column(0))
+				--			lcp:addComplementory3(500,totalDIM, numActualDOF*2,numActualDOF*2+cdim,CI ,ci )
+				Eigen.solveQuadprog(lcp, w.CElcp, w.ce0lcp, w.CI:sub(0, w.VtJ:rows()+cdim), w.ci0:range(0,w.VtJ:rows()+cdim),w.x_lcp)
+				ddql=w.x_lcp:range(0, self.numActualDOF)
+				taul=w.x_lcp:range(self.numActualDOF, self.numActualDOF*2)
+				lambdal=w.x_lcp:range(self.numActualDOF*2, w.x:size())
+				accl=mLCP*lambdal:column()+mLCP0
+			else
+				-- use lambda only
+				local x=vectorn()
+				local CI=matrixn()
+				local ci0=vectorn()
+				CI:setSize(cdim*2, cdim)
+				ci0:setSize(cdim*2)
+				CI:setAllValue(0)
+				CI:sub(0,cdim,0,cdim):assign(mLCP)
+				CI:sub(cdim, cdim*2, 0,cdim):identity()
+				ci0:range(0, cdim):assign(mLCP0:column(0))
+				ci0:range(cdim, cdim*2):setAllValue(0)
+
+				if false then
+					local lcp=HessianQuadratic(cdim)
+					lcp:addComplementory(500, 0, cdim, mLCP, mLCP0:column(0))
+					Eigen.solveQuadprog(lcp, matrixn(), vectorn(),CI, ci0, x) 
+					accl=mLCP*x:column()+mLCP0
+				else
+					local acc=vectorn()
+					HessianQuadratic.solveLCP(mLCP, mLCP0:column(0),x, acc);
+					accl=acc
+				end
+
+				--checkLCP(x, matrixn(), vectorn(), CI, ci0, mLCP, mLCP0, 0, cdim)
+				w.x_lcp:setSize(numActualDOF*2+cdim)
+				
+				ddql=w.x_lcp:range(0, self.numActualDOF)
+				taul=w.x_lcp:range(self.numActualDOF, self.numActualDOF*2)
+				taul:assign(tau)
+				lambdal=w.x_lcp:range(self.numActualDOF*2, w.x:size())
+				lambdal:assign(x)
+				ddql:assign((invM*(tau:column()+w.JtV*lambda:column()-w.b:column())):column(0))
+			end
+
+			--checkLCP(w.x_lcp, w.CElcp, w.ce0lcp, w.CI:sub(0, w.VtJ:rows()+cdim), w.ci0:range(0,w.VtJ:rows()+cdim), mLCP, mLCP0, numActualDOF*2, numActualDOF*2+cdim)
+			--dbg.console()
+			w.x:assign(w.x_lcp)
+		end
+		assert(w.x==w.x)
+		self.controlforce:range(0,7):setAllValue(0)
+		self.controlforce:range(7,self.controlforce:size()):assign(w.x:range(numActualDOF+6,numActualDOF*2))
+
+		--##dos
+if g_debugOneStep then --##dos
+g_debugOneStep:pushBack({"qpcontrolForce", w.x:copy(), w.CE:copy(), w.ce0:copy(), w.CI:copy(), w.ci0:copy()}) end 
+		local w=self.workspace
+		local ddq=w.x:range(0, self.numActualDOF)
+		local aggCF=vector3(0,0,0)
+		if true then -- export contact force
+			local lambda=w.x:range(self.numActualDOF*2, w.x:size())
+			local skel=self.dofInfo:skeleton()
+			local lfoot=skel:getTreeIndexByVoca(MotionLoader.LEFTANKLE)
+			local ltoes=skel:getTreeIndexByVoca(MotionLoader.LEFTTOES)
+			local rfoot=skel:getTreeIndexByVoca(MotionLoader.RIGHTANKLE)
+			local rtoes=skel:getTreeIndexByVoca(MotionLoader.RIGHTTOES)
+
+			if lambda:size()>0 then 
+				local w=self.workspace
+				assert(w.bases and  w.bases:size()>0)
+				local collector
+				if mrd_info and mrd_info.outputContactForce then
+					collector=mrd_info.outputContactForce[2]
+				else
+					collector={vector3(0,0,0), vector3(0,0,0), vector3(0,0,0)}
+				end
+				local limbs={L=1,R=2,O=3}
+				for i=1,3 do collector[i]:assign(vector3(0,0,0)) end
+				local giOffset=self.giOffset
+				local excludeNormalBasis=self.excludeNormalBasis
+				for i=0, w.bases:size()-1 do
+					local b=w.bases(i)
+					local limb=limbs.O
+					if b.ibone==lfoot or b.ibone==ltoes then
+						limb=limbs.L
+					elseif b.ibone==rfoot or b.ibone==rtoes then
+						limb=limbs.R
+					end
+
+					local cb=collector[limb]
+					if not excludeNormalBasis then
+						cb:radd(lambda(b.globalIndex)*b.normal)
+					end
+					for j=0, b.frictionNormal:size()-1 do
+						local gi=b.globalFrictionIndex+j-giOffset
+						cb:radd(lambda(gi)*b.frictionNormal(j))
+					end
+				end
+				for i=1,3 do 
+					aggCF:radd(collector[i])
+				end
+			end
+		end
+		self.state.aggContactForce:assign(aggCF)
+		if false then -- verify QP solution
+			local tau=w.x:range(self.numActualDOF, self.numActualDOF*2)
+			local lambda=w.x:range(self.numActualDOF*2, w.x:size())
+			if lambda:size()>0 then
+				local tau1= w.M*ddq:column()+w.b:column()-w.JtV*lambda:column()
+				print('tau=',tau)
+				print('lambda=',lambda) -- should be larger than 0
+				print('lambda min=', lambda:minimum())
+				if self.useMLCPmatFromAIST then
+					local ca=(w.Mlcp*lambda:column()+w.Mlcp_bias:column()):column(0)
+					print('contactacc=', ca) -- should be larger than 0
+					print('contactacc min=', ca:minimum()) -- should be larger than 0
+				end
+				print('tauerr=', tau1:column(0)-tau) -- should be 0
+				print('ddq, desiredacc=', ddq, self.desiredacceleration:range(7,self.desiredacceleration:size())) -- should be similar
+				print(ddq:range(6,ddq:size())- self.desiredacceleration:range(7,self.desiredacceleration:size())) -- should be similar
+				
+				-- all tested o.k.
+				--dbg.console()
+			else
+			end
+		end
+		if false then -- verify calcJacobian
+			mat1=matrixn()
+			mat2=matrixn()
+			local dq=vectorn(self.dtheta:size()-1)
+			dq:range(0,3):assign(self.dtheta:range(4,7)) dq:range(3,6):assign(self.dtheta:range(0,3)) dq:range(6,dq:size()):assign(self.dtheta:range(7,self.dtheta:size()))
+
+			simulator:calcMomentumDotJacobian(0, mat1, mat2);
+			local mmm=simulator:calcMomentumCOM(0)
+			if false then -- verify calcMomentumCOMfromPose
+				local pose1=simulator._lastSimulatedPose
+				local pose2=pose1:copy()
+				local tf2=MotionDOF.rootTransformation(pose1)
+				print('tf2',tf2)
+				local dt=1/120
+				tf2:integrate(liegroup.se3(dq:toVector3(0), dq:toVector3(3)), dt)
+				MotionDOF.setRootTransformation(pose2, tf2)
+				pose2:range(7,pose2:size()):radd(dq:range(6,dq:size())*dt)
+
+				local mmm2=simulator:calcMomentumCOMfromPose(0,dt,pose1,pose2)
+				print(mmm)
+				print(mmm2)
+				-- these two should be similar. tested o.k.
+			end
+			local dotL=(mat1*ddq:column()+mat2*dq:column()):column(0):copy()
+
+			local momentum=(mat1*dq:column()):column(0):copy()
+			if prevMomentum then
+				print('dotL', dotL/self.dtinv, momentum-prevMomentum)
+				print('dotL2', dotL/self.dtinv, prevDotL)
+				print('dotL3', (mat1*ddq:column()):column(0):copy()/self.dtinv, momentum-prevMomentum)
+				-- test failed.
+				--dbg.console()
+			end
+
+			-- simulator:calcCOMjacobian(0, mat1)
+			local mm1=mat1:copy()
+			local mm2=mat2:copy()
+			simulator:calcCOMdotJacobian(0, mat1, mat2) -- com j and dj
+			if true then
+				local totalMass=simulator:calcTotalMass(0)
+				-- verify linear momentum jacobians equals to comdotjacobian*mass
+				print(mm1:sub(3,6),mat1*totalMass) -- tested o.k.
+				print(mm2:sub(3,6),mat2*totalMass) -- tested o.k.
+
+				local dotL=(mat1*ddq:column()+mat2*dq:column()):column(0):copy()
+				if prevMomentum then
+					print('dotL', dotL*(totalMass/self.dtinv), momentum-prevMomentum)
+				end
+			end
+
+			if prevMomentum then
+				prevDotL=momentum-prevMomentum
+			end
+			prevMomentum=momentum
+			print('momentum:',prevMomentum , mmm)
+
+			local v=simulator:calculateCOMvel(0)
+			print('comvel:',v.x,v.y,v.z,'err:', CT.vec(v.x,v.y,v.z)-(mat1*dq:column()):column(0))
+			local cdv2=(mat1*ddq:column()+mat2*dq:column()):column(0):copy()
+
+			local ibone=simulator:skeleton(0):getTreeIndexByName('lfoot')
+			simulator:calcJacobian(0,ibone,mat1)
+			simulator:calcDotJacobian(0,ibone,mat2)
+			local v=simulator:getWorldVelocity(0, simulator:skeleton(0):VRMLbone(ibone), vector3(0,0,0))
+			local w=simulator:getWorldAngVel(0, simulator:skeleton(0):VRMLbone(ibone))
+			print("v,w=",v,w)
+			print(CT.vec(w.x,w.y,w.z,v.x,v.y,v.z)-(mat1*dq:column()):column(0))
+			
+			local mat3=matrixn()
+			local mat4=matrixn()
+			local lpos=vector3(0,0,0.2)
+			simulator:calcBoneDotJacobian(0,ibone,lpos, mat3, mat4)
+			local v3= simulator:getWorldVelocity(0, simulator:skeleton(0):VRMLbone(ibone), lpos)
+			print("v3=", v3)
+			print(CT.vec(v3.x, v3.y, v3.z)-(mat3*dq:column()):column(0))
+			print("ddq=", ddq)
+			dbg.console()
+			simulator:stepKinematic(ddq, vectorn(), false)
+			do
+				local w=self.workspace
+				if w.bases and  w.bases:size()>0 then
+					-- local tau=w.x:range(self.numActualDOF, self.numActualDOF*2)
+					-- local lambda=w.x:range(self.numActualDOF*2, w.x:size())
+					-- simulator:getLCPmatrix(w.Mlcp, w.Mlcp_bias)
+					-- print('contactacc1=', (w.Mlcp*lambda:column()+w.Mlcp_bias:column()):column(0)) -- should be larger than 0
+					local dq=w.dq
+					local ca=(w.VtJ2*ddq:column()+w.VtDotJ*dq:column()+w.dotVtJ*dq:column()):column(0)
+					-- local ca2=(w.VtJ2*ddq:column()+w.VtDotJ*dq:column()):column(0)
+					-- local ca3=(w.J*ddq:column()+w.dotJ*dq:column()):column(0)
+					print('contactacc=', ca)
+					-- print('contactacc2=', ca2)
+					-- print('contactacc3=', ca3:extract(CT.colon(4, ca3:size(), 6)))
+					for i=0, w.bases:size()-1 do
+						local b=w.bases(i)
+						local bone=simulator:skeleton(0):VRMLbone(b.ibone)
+						io.write(bone:name() .." :")
+						local  lpos=simulator:getWorldState(0):globalFrame(b.ibone):toLocalPos(b.globalpos)
+						-- io.write('lpos=', tostring(lpos))
+						io.write(tostring(simulator:getWorldAcceleration(0,simulator:skeleton(0):VRMLbone(b.ibone),lpos).y-9.8))
+						-- io.write(' '..tostring(simulator:getWorldAcceleration(0,simulator:skeleton(0):VRMLbone(b.ibone),vector3(0,0,0)).y-9.8))
+						-- io.write('\n')
+					end
+					print('contactacc2 min=', ca:minimum()) -- should be larger than 0
+				end
+			end
+			local cdv=simulator:calculateCOMacc(0)
+			print('comacc= ',CT.vec(cdv.x, cdv.y, cdv.z)-cdv2)
+			local dv=simulator:getWorldAcceleration( 0, simulator:skeleton(0):VRMLbone(ibone), vector3(0,0,0))
+			local dw=simulator:getWorldAngAcc( 0, simulator:skeleton(0):VRMLbone(ibone))
+			print("dv,dw=",dv,dw)
+			local dwv=CT.vec(dw.x,dw.y,dw.z,dv.x,dv.y-9.8,dv.z)
+			-- print((mat1*ddq:column()):column(0))
+			local acc=(mat1*ddq:column()):column(0)+(mat2*dq:column()):column(0)
+			print(acc-dwv)
+			local dv3= simulator:getWorldAcceleration(0, simulator:skeleton(0):VRMLbone(ibone), lpos)
+			local acc=(mat3*ddq:column()):column(0)+(mat4*dq:column()):column(0)
+			print("v3=",CT.vec(v3.x, v3.y, v3.z)-(mat3*dq:column()):column(0))
+			print("dv3=", CT.vec(dv3.x, dv3.y-9.8, dv3.z)-acc)
+		end
+		--print('ddq', ddq)
+		--print('before 2', self.theta)
+		simulator:stepKinematic(ddq, vectorn(), true)
+
+		--self:sampleCurrPose()
+		--print('after 2', self.theta)
+	end
+end
+function QPservo:_generateTorque(sim, frame, maxForce, swingFoot)
+	local simulator=self.simulator
+
+	self:sampleCurrPose(simulator)
+	self:calcDesiredAcceleration(simulator, frame, self.theta, self.dtheta)
+
+	self:QPsolve(simulator, self.theta, self.dtheta)
+end
+
+function QPservo:calcDQ()
+	local dq=vectorn(self.dtheta:size()-1)
+	dq:range(0,3):assign(self.dtheta:range(4,7)) dq:range(3,6):assign(self.dtheta:range(0,3)) dq:range(6,dq:size()):assign(self.dtheta:range(7,self.dtheta:size()))
+	return dq
+end
+function QPservo:addCOMobjective(sim, desiredCOMacc, weight)
+	local simulator=self.simulator
+	local weight=weight or 5000
+	if weight~=0 then
+		local qp=self.qp
+		local J=matrixn()
+		local DJ=matrixn()
+		local dq=self:calcDQ()
+		simulator:calcCOMdotJacobian(0, J, DJ) -- com j and dj
+		--qp:addV(weight, J, 0, dq:size(), DJ*dq:column()-CT.mat(3,1,desiredCOMacc.x, desiredCOMacc.y, desiredCOMacc.z))
+		qp:addVselective(weight, J, 0, dq:size(), DJ*dq:column()-CT.mat(3,1,desiredCOMacc.x, desiredCOMacc.y, desiredCOMacc.z), CT.vec(1))
+	end
+end
+function QPservo:addBoneObjective(sim, ibone, localpos, desiredAcc, weight, onlyHorizontal)
+	local simulator=self.simulator
+	local weight=weight or 50000
+	local qp=self.qp
+	local J=matrixn()
+	local DJ=matrixn()
+	local dq=self:calcDQ()
+	simulator:calcBoneDotJacobian(0, ibone, localpos, J, DJ) 
+	--##dos
+if g_debugOneStep then --##dos
+g_debugOneStep:pushBack({"addboneobj",ibone,localpos:copy(), J:copy(), DJ:copy(), desiredAcc:copy(),weight }) --##dos
+end 
+	if onlyHorizontal then
+		qp:addVselective(weight, J, 0, dq:size(), DJ*dq:column()-CT.mat(3,1,desiredAcc.x, desiredAcc.y, desiredAcc.z), CT.vec(0,2))
+	else
+		qp:addV(weight, J, 0, dq:size(), DJ*dq:column()-CT.mat(3,1,desiredAcc.x, desiredAcc.y, desiredAcc.z))
+	end
+
+end
+function QPservo:addBoneObjective2(sim, ibone, localpos, desiredAccRot, desiredAcc, weight, weightLin)
+	local simulator=self.simulator
+	local weight=weight or 50000
+	if weightLin==nil then
+		weightLin=weight
+	end
+	local qp=self.qp
+	local J=matrixn()
+	local DJ=matrixn()
+	local dq=self:calcDQ()
+	simulator:calcBoneDotJacobian2(0, ibone, localpos, J, DJ) 
+	--##dos
+if g_debugOneStep then --##dos
+g_debugOneStep:pushBack({"addboneobj2",ibone,localpos:copy(),desiredAccRot:copy(),desiredAcc:copy(), weight, J:copy(), DJ:copy()}) --##dos
+end 
+	local desired=DJ*dq:column()-CT.mat(6,1,desiredAccRot.x, desiredAccRot.y, desiredAccRot.z, desiredAcc.x, desiredAcc.y, desiredAcc.z)
+	qp:addVselective(weight*0.5, J, 0, dq:size(), desired , CT.vec(0,1,2)) -- angular acc
+	qp:addVselective(weightLin, J, 0, dq:size(), desired , CT.vec(3,4,5)) -- linear acc
+end
+function QPservo:addMomentumObjective(sim_unused,desiredDotAngMomentum, desiredDotLinMomentum,weight_ang, weight_lin)
+	local simulator=self.simulator
+	if self.workspace.link_pair_count>0 then
+		local weight=weight or 50000
+		local qp=self.qp
+		local J=matrixn()
+		local DJ=matrixn()
+
+
+		local dq=self:calcDQ()
+		simulator:calcMomentumDotJacobian(0, J, DJ) 
+
+		if false then
+			local footJ=matrixn()
+			simulator:calcJacobian(0, simulator:skeleton(0):getTreeIndexByVoca(MotionLoader.RIGHTANKLE), footJ)
+			footJ:sub(0,6,0,6):setAllValue(0)
+			J:sub(0,6,0,6):setAllValue(0)
+			DJ:sub(0,6,0,6):setAllValue(0)
+			J=J*math.nullspaceProjector(footJ)
+		end
+
+		if false then
+			local pose=vectorn()
+			local footLoop=self.footLoop
+			local skel=footLoop.skel
+			local sim=footLoop.sim
+			skel:convertSourcePose(self.theta, pose)
+			sim:setLinkData(0, Physics.DynamicsSimulator.JOINT_VALUE,pose)
+			sim:initSimulation()
+			local footJ=matrixn(6, skel.dofInfo:numActualDOF())
+			local footJ2=matrixn()
+			sim:calcJacobian(0, footLoop.Rindex, footJ2)
+			--footJ2:sub(0,6,0,6):setAllValue(0)
+			for i=0,5 do
+				skel:convertDQexceptRoot(footJ2:row(i), footJ:row(i))
+			end
+			footJ:sub(0,6,0,6):setAllValue(0)
+			J=J*math.nullspaceProjector(footJ)
+		end
+
+		if false then
+			-- exclude neck joint  for momentum control
+			local skel=simulator:skeleton(0)
+
+			local headIndex=skel:getTreeIndexByVoca(MotionLoader.HEAD)
+			local function crop(headIndex)
+				local sR=skel.dofInfo:startR(headIndex)
+				local eR=skel.dofInfo:endR(headIndex)
+				--headBone=skel:VRMLbone(headIndex)
+				for i=sR, eR-1 do
+					J:column(i-1):setAllValue(0)
+					--DJ:column(i-1):setAllValue(0)
+				end
+			end
+
+			crop(headIndex)
+			crop(skel:VRMLbone(headIndex):parent():treeIndex())
+		end
+		--##dos
+if g_debugOneStep then --##dos
+local ee=matrixn() simulator:test('getExactStateSpherical', ee) --##dos
+local theta=vectorn() local dtheta=vectorn() simulator:getLinkData(0, Physics.DynamicsSimulator.JOINT_VALUE, theta) simulator:getLinkData(0, Physics.DynamicsSimulator.JOINT_VELOCITY, dtheta) g_debugOneStep:pushBack({"addmmobj",ee,simulator._lastSimulatedPose:copy(), simulator:calculateCOM(0),simulator:calcCOM2_gmbs(0),simulator:calculateCOMvel(0), desiredDotAngMomentum:copy(), theta, dtheta, J:copy(), DJ:copy(),weight}) --##dos
+end 
+		qp:addVselective(weight_ang, J, 0, dq:size(), DJ*dq:column()-CT.mat(6,1,desiredDotAngMomentum.x, desiredDotAngMomentum.y, desiredDotAngMomentum.z,
+		desiredDotLinMomentum.x, desiredDotLinMomentum.y, desiredDotLinMomentum.z), CT.vec(0,1,2))
+		if weight_lin then
+			qp:addVselective(weight_lin, J, 0, dq:size(), DJ*dq:column()-CT.mat(6,1,desiredDotAngMomentum.x, desiredDotAngMomentum.y, desiredDotAngMomentum.z,
+			desiredDotLinMomentum.x, desiredDotLinMomentum.y, desiredDotLinMomentum.z), CT.vec(3,4,5))
+		end
+		--RE.output2("momentumOBJ","true")
+	else
+		--RE.output2("momentumOBJ","false")
+	end
+end
+function QPservo:QPsolve(sim, state, dstate, spprtImportance)
+	local simulator=self.simulator
+
+	
+	local link_pair_count=simulator:getNumContactLinkPairs()
+	local numActualDOF=self.numActualDOF
+	local w=self.workspace
+	simulator:calcMassMatrix3(0, w.M, w.b)
+	--_checkpoints:pushBack(deepCopyTable({'mass', w.M, w.b, link_pair_count}))
+	--print('state', self.theta, self.dtheta)
+	--print('mass', w.M, w.b, link_pair_count)
+	--self.simulator:skeleton(0):printHierarchy()
+	--for i=1, self.simulator:skeleton(0):numBone()-1 do print(self.simulator:skeleton(0):VRMLbone(i):mass()) end
+
+--##dos
+if g_debugOneStep then --##dos
+print('_qpsolv') --##dos
+g_debugOneStep:pushBack({'state', state:copy(), dstate:copy()}) --##dos
+g_debugOneStep:pushBack({'desiredacc', self.desiredacceleration:copy()}) --##dos
+end
+
+	if false then
+		local M=matrixn()
+		local b=vectorn(w.b:size())
+		simulator:calcMassMatrix2(0, M, b)
+		if M:isSimilar(w.M) then
+			print('M==w.M')
+		else
+			print('M!=w.M')
+			assert(false)
+		end
+
+		if b:row():isSimilar(w.b:row()) then
+			print('b==w.b')
+		else
+			print('b!=w.b')
+		end
+	end
+	self.controlforce:setSize(numActualDOF+1)
+	self.controlforce:setAllValue(0)
+	w.link_pair_count=link_pair_count
+
+	local state=self.state
+	for i=1, self.numCLinks do state.prevContact[i]=state.contact[i] state.contact[i]=false end
+	if link_pair_count>0 then
+		if w.bases==nil then w.bases=Physics.Vec_ContactBasis() end
+		if w.accbases==nil then w.accbases=Physics.Vec_ContactBasis() end
+		simulator:getContactBases(w.bases,self.invfricCoef)
+		simulator:getContactBases(w.accbases,useCase.invAccConeCoef or self.invfricCoef) -- basis vectors for acceleration cone can be different from those of friction cones
+
+		local giOffset=0
+		local excludeNormalBasis=self.excludeNormalBasis  -- redundant basis vector
+
+		if excludeNormalBasis then
+			for i=0, w.bases:size()-1 do
+				local b=w.bases(i)
+				local gi=b.globalIndex
+				giOffset=math.max(giOffset, gi+1)
+			end
+		end
+		self.giOffset=giOffset
+		if true then
+			-- setting friction cone for contact force
+			simulator:calcContactJacobianAll(w.J, w.dotJ, w.V, w.dotV, link_pair_count,self.invfricCoef)
+			-- setting acceleration cone
+			simulator:calcContactBasisAll(w.V2, w.dotV2, link_pair_count,useCase.invAccConeCoef or self.invfricCoef)
+			if excludeNormalBasis then
+				w.V:assign(w.V:sub(0,0,giOffset,0):copy())
+				w.dotV:assign(w.dotV:sub(0,0,giOffset,0):copy())
+				w.V2:assign(w.V2:sub(0,0,giOffset,0):copy())
+				w.dotV2:assign(w.dotV2:sub(0,0,giOffset,0):copy())
+			end
+			w.JtV:multAtB(w.J, w.V)
+			-- mJtV=matrixn()
+			-- simulator:calcContactJacobian(mJtV, link_pair_count)
+			-- dbg.console()
+		else
+			simulator:calcContactJacobian(w.JtV, link_pair_count)
+		end
+		local cdim=w.JtV:cols()
+		local totalDIM=numActualDOF*2+cdim -- ddq, tau, lambda
+		local qp=HessianQuadratic(totalDIM)
+		self.qp=qp
+		local ddqObjWeight=useCase.ddqObjWeight or 10000
+		local weight=self.weight
+		assert(ddqObjWeight)
+		-- minimize desired acc error
+		if self.excludeRoot then
+			local w=1
+			for i=0,3 do -- root
+				qp:addD(w,i,0)
+			end
+			for i=3,6 do -- root
+				qp:addD(w,i,0)
+			end
+		else
+			for i=0,3 do -- root
+				qp:addD(ddqObjWeight*self.weight(i+4),i,self.desiredacceleration(i+4))
+			end
+			if useCase.excludeRootPos then
+				for i=3,6 do -- root
+					qp:addD(1,i,self.desiredacceleration(i-3))
+				end
+			else
+				for i=3,6 do -- root
+					qp:addD(ddqObjWeight*self.weight(i-3),i,self.desiredacceleration(i-3))
+				end
+
+				--local dv=self.desiredacceleration:toVector3(0)
+				--local R=simulator:getWorldState(0):globalFrame(1).rotation
+				--dbg.draw('Arrow', vector3(0,100,0), vector3(0,100,0)+rotate(dv,R)*100,'R*dv')
+			end
+		end
+
+		--_checkpoints:pushBack(deepCopyTable({'wi', self.weight, self.desiredacceleration}))
+		for i=6,numActualDOF-1 do
+			qp:addD(ddqObjWeight*self.weight(i+1),i,self.desiredacceleration(i+1))
+		end
+
+		--##dos
+if g_debugOneStep then --##dos
+g_debugOneStep:pushBack({"qp1",qp.H:copy(), qp.R:copy()}) --##dos
+end
+
+		-- minimize joint torque
+		if useCase.tauObjWeight>1 then
+			local w=useCase.tauObjWeight or 0.00001
+			for i=0,5 do
+				qp:addD(0.00001,i+numActualDOF,0)
+			end
+			for i=6,numActualDOF-1 do
+				qp:addD(w*self.weight(i+1),i+numActualDOF,self.desiredacceleration(i+1)*2)
+			end
+		else
+			local w=useCase.tauObjWeight or 0.00001
+			assert(w)
+			for i=0,numActualDOF-1 do
+				qp:addD(w,i+numActualDOF,0)
+			end
+		end
+		local minimizeCOMjerk=false
+		if true then
+			-- minimize contact force
+			local lw=useCase.lambdaObjWeight or 0.00001
+			local lw2=useCase.lambdaObjWeight2 or 10
+			assert(lw)
+			if spprtImportance then
+
+				local boneIndex=intvectorn()
+				simulator:calcContactBoneIndex(link_pair_count, boneIndex);
+
+				local importance=vectorn(cdim)
+				importance:setAllValue(0)
+				local bi=self.bi
+				for k, isL in ipairs({'L','R','LH', 'RH'}) do
+					for i=0, cdim -1 do
+						local bii=boneIndex(i)
+						local bii2=bi[isL]
+						if bii==bii2 or bii==bii2+1 then -- ankle or toe
+							importance:set(i,spprtImportance[isL])
+						end
+					end
+					--RE.output('imp_'..isL, spprtImportance[isL])
+				end
+				local function impMap(imp)
+					return sop.map(math.pow(1-imp,4), 1,0, lw, lw2)
+				end
+				if useCase.spprtImpFromImp then
+					impMap=function(imp)
+						return sop.map(math.pow(imp,4), 0,1, lw, lw2)
+					end
+				end
+				for i=0, w.bases:size()-1 do
+					local b=w.bases(i)
+					local gi=b.globalIndex
+					if not excludeNormalBasis then
+						qp:addD(impMap(importance(gi)),gi+numActualDOF*2,0)
+					end
+					for j=0, b.frictionNormal:size()-1 do
+						gi=b.globalFrictionIndex+j-giOffset
+						qp:addD(impMap(importance(gi)),gi+numActualDOF*2,0)
+					end
+				end
+
+				--for i=0,cdim-1 do
+				--	qp:addD(sop.map(importance(i), 0,1, lw, 0.0001),i+numActualDOF*2,0)
+				--	qp:addD(sop.map(math.pow(importance(i),2), 0,1, lw, 0.0001),i+numActualDOF*2,0)
+				--	qp:addD(sop.map(math.pow(1-importance(i),4), 1,0, lw, 10),i+numActualDOF*2,0)
+				--	qp:addD(sop.map(math.pow(1-importance(i),4), 1,0, lw, 0.0001),i+numActualDOF*2,0)
+				--  qp:addD(sop.clampMap(importance(i),0,0.01,lw,10) ,i+numActualDOF*2,0)
+				--	end
+				if importance(0)>=0.01 and importance(0)<=0.99 then
+					minimizeCOMjerk=true
+				end
+			else
+				for i=0,cdim-1 do
+					qp:addD(lw,i+numActualDOF*2,0)
+				end
+			end
+		end
+
+
+		-- set inequality constraints
+		do
+			-- use [de Lasa et al, SIGGRAPH2010]
+			-- a_c=V'J ddq + V'dotJ dq + dotV' J dq >= 0
+
+			assert(w.J:rows()==link_pair_count*6)
+			assert(w.J:cols()==numActualDOF)
+			assert(w.V:rows()==link_pair_count*6)
+			assert(w.V:cols()==cdim)
+
+			if w.VtJ==nil then w.VtJ=matrixn() end
+			if w.VtJ2==nil then w.VtJ2=matrixn() end
+			if w.VtDotJ==nil then w.VtDotJ=matrixn() end
+			if w.dotVtJ==nil then w.dotVtJ=matrixn() end
+			if false then
+				-- need to leave only translational terms.. somewhat tricky
+				w.t=w.t or {}
+				local t=w.t
+				if t.V==nil then t.V=matrixn() end
+				if t.J==nil then t.J=matrixn() end
+				if t.dotJ==nil then t.dotJ=matrixn() end
+				if t.dotV==nil then t.dotV=matrixn() end 
+				t.V:setSize(link_pair_count*3,cdim)
+				t.dotV:setSize(link_pair_count*3,cdim)
+				t.J:setSize(link_pair_count*3,numActualDOF)
+				t.dotJ:setSize(link_pair_count*3,numActualDOF)
+
+				for i=0,link_pair_count-1 do
+					t.V:sub(i*3,(i+1)*3,0,0):assign(w.V:sub((i*6)+3, (i+1)*6,0,0))
+					t.dotV:sub(i*3,(i+1)*3,0,0):assign(w.dotV:sub((i*6)+3, (i+1)*6,0,0))
+					t.J:sub(i*3,(i+1)*3,0,0):assign(w.J:sub((i*6)+3, (i+1)*6,0,0))
+					t.dotJ:sub(i*3,(i+1)*3,0,0):assign(w.dotJ:sub((i*6)+3, (i+1)*6,0,0))
+				end
+				-- for contact force
+				w.VtJ:multAtB(t.V, t.J)
+				-- for accelerations -- I used a narrower cone
+				w.VtJ2:multAtB(t.V2, t.J)
+				w.VtDotJ:multAtB(t.V2, t.dotJ)
+				w.dotVtJ:multAtB(t.dotV2, t.J)
+			else
+				w.VtJ:transpose(w.JtV)
+				w.VtJ2:multAtB(w.V2, w.J)
+				w.VtDotJ:multAtB(w.V2, w.dotJ)
+				w.dotVtJ:multAtB(w.dotV2, w.J)
+			end
+
+			local numConTau=numActualDOF-6
+			local clampTorque=true
+			local maxTorque= useCase.maxTorque or 400
+			if clampTorque==false then
+				maxTorque=160 --  actually maxAcceleration (clampAcceleration)
+			end
+			local clampLambda=false -- clamping lambdas independently doesn't have any physical meaning. Instead, I will try to clamp aggregated contact force
+			local numConLambda=w.VtJ:rows()
+			assert(numConLambda==totalDIM-numActualDOF*2)
+			local maxLambda=10
+			if not clampLambda then
+				numConLambda=0
+			end
+			local clampAggLambda=true
+			local maxAggLambda=4500
+
+			local maxDepth=-1
+			local avgDpth=0
+			local cmargin=useCase.contactMargin or 0.005
+			do 
+				-- calc max Depth and avgDpth
+				local argMax=-1
+				for i=0, w.bases:size()-1 do
+					local b=w.bases(i)
+					avgDpth=avgDpth+b.depth
+					if b.depth>maxDepth then
+						maxDepth=b.depth
+						argMax=i
+					end
+				end
+				avgDpth=avgDpth/w.bases:size()
+			end
+			--print(maxDepth, cmargin, avgDpth)
+			--local criteria=maxDepth
+			local criteria=2*avgDpth
+			maxAggLambda=sop.map(criteria, 0, cmargin, 0, useCase.maxAggLambda or 500)
+			if criteria>cmargin then clampAggLambda=false end
+			local numConAggLambda=0
+			local agg_weight={}
+			if clampAggLambda then 
+				local weight=agg_weight
+				numConAggLambda=1
+				local axes={'y'}
+				for i,a in ipairs(axes) do
+					weight[a]=vectorn(cdim)
+					weight[a]:zero()
+				end
+				for i=0, w.bases:size()-1 do
+					local b=w.bases(i)
+					local gi=b.globalIndex
+					if not excludeNormalBasis then
+						for k,a in ipairs(axes) do weight[a]:set(gi, weight[a](gi)+b.normal[a]) end
+					end
+					for j=0, b.frictionNormal:size()-1 do
+						gi=b.globalFrictionIndex+j-giOffset
+						for k,a in ipairs(axes) do weight[a]:set(gi, weight[a](gi)+b.frictionNormal(j)[a]) end
+					end
+				end
+			end
+
+			w.CI:setSize(w.VtJ:rows()+cdim+numConTau*2+numConLambda+numConAggLambda, totalDIM) 
+			w.CI:setAllValue(0)
+			w.ci0:setSize(w.VtJ:rows()+cdim+numConTau*2+numConLambda+numConAggLambda)
+			w.ci0:setAllValue(0)
+			--if minimizeCOMjerk then
+			if false then
+				-- minimize COM jerk - actually increased rolling and pitching
+				local weight={}
+				local axes={'x','y','z'}
+				for i,a in ipairs(axes) do
+					weight[a]=vectorn(cdim+1)
+					weight[a]:zero()
+				end
+				for i=0, w.bases:size()-1 do
+					local b=w.bases(i)
+					local gi=b.globalIndex
+					if not excludeNormalBasis then
+						for k,a in ipairs(axes) do weight[a]:set(gi, weight[a](gi)+b.normal[a]) end
+					end
+					for j=0, b.frictionNormal:size()-1 do
+						gi=b.globalFrictionIndex+j-giOffset
+						for k,a in ipairs(axes) do weight[a]:set(gi, weight[a](gi)+b.frictionNormal(j)[a]) end
+					end
+				end
+				local index=CT.colon(numActualDOF*2, totalDIM,1)
+				for k,a in ipairs(axes) do
+					weight[a]:set(weight[a]:size()-1, self.state.aggContactForce[a]*-1)
+					if minimizeCOMjerk then
+						qp:addSquaredW(800, index, weight[a])
+					else
+						qp:addSquaredW(50, index, weight[a])
+					end
+				end
+			end
+			-- update contact state
+			for i=0, w.bases:size()-1 do
+				state.contact[w.bases(i).ilinkpair+1]=true
+			end
+
+			if false then
+				local mat=vector3N(w.bases:size()*2)
+				for i=0, w.bases:size()-1 do
+					mat(i*2):assign(w.bases(i).globalpos)
+					mat(i*2+1):assign(w.bases(i).globalpos+vector3(0,0.1,0))
+				end
+				dbg.draw('Traj', mat:matView()*100, "contacts")
+				--dbg.console()
+			end
+			local dq=w.dq
+			if dq==nil then w.dq=vectorn(self.dtheta:size()-1) dq=w.dq end
+			dq:range(0,3):assign(self.dtheta:range(4,7))
+			dq:range(3,6):assign(self.dtheta:range(0,3))
+			dq:range(6,dq:size()):assign(self.dtheta:range(7,self.dtheta:size()))
+
+			w.CI:sub(0, w.VtJ:rows(), 0, numActualDOF):assign(w.VtJ2) -- ddq (contact acceleration constraints)
+			w.CI:sub(w.VtJ:rows(), w.VtJ:rows()+cdim, numActualDOF*2, totalDIM):identity() --lambdas (friction cone coefs). These constrain contact forces.
+			w.ci0:range(0, w.VtJ:rows()):assign((w.VtDotJ*dq:column()):column(0))
+			w.ci0:range(0, w.VtJ:rows()):radd((w.dotVtJ*dq:column()):column(0))
+
+			--_checkpoints:pushBack(deepCopyTable({'w', w.VtJ,w.dotVtJ}))
+			--_checkpoints:pushBack(deepCopyTable({'dq',dq, w.CI, w.ci0}))
+
+			if numConTau>0 then
+				local start=w.VtJ:rows()+cdim
+				local startc=numActualDOF
+				if not clampTorque then startc=0 end
+				-- -tau + maxTorque>0
+				w.CI:sub(start, start+numConTau, startc+6, startc+numActualDOF):identity()
+				w.CI:sub(start, start+numConTau, startc+6, startc+numActualDOF):rmult(-1)
+				--w.ci0:range(start, start+numConTau):setAllValue(maxTorque)
+				local www=self.weight2:range(7,numActualDOF+1)
+				w.ci0:range(start, start+numConTau):assign(maxTorque*www)
+				-- tau+maxTorque>0
+				w.CI:sub(start+numConTau, start+numConTau*2, startc+6, startc+numActualDOF):identity()
+				--w.ci0:range(start+numConTau, start+numConTau*2):setAllValue(maxTorque)
+				w.ci0:range(start+numConTau, start+numConTau*2):assign(maxTorque*www)
+			end
+
+			if numConLambda>0 then
+				local start=w.VtJ:rows()+cdim+numConTau*2
+				-- lambda
+				-- -lambda +maxTorque>0
+				w.CI:sub(start, start+numConLambda, numActualDOF*2,totalDIM):identity()
+				w.CI:sub(start, start+numConLambda, numActualDOF*2,totalDIM):rmult(-1)
+				w.ci0:range(start, start+numConLambda):setAllValue(maxLambda)
+			end
+			if numConAggLambda>0 then
+				local start=w.VtJ:rows()+cdim+numConTau*2+numConLambda
+				-- -w*lambda +maxTorque>0
+				w.CI:row(start):range(numActualDOF*2,totalDIM):assign(agg_weight.y*-1)
+				w.ci0:set(start, maxAggLambda)
+			end
+
+			if false then
+				-- add velocity-dependent margin for a single point which maximally penetrates.
+
+				local maxDepth=-1
+				local argMax=-1
+				for i=0, w.bases:size()-1 do
+					local b=w.bases(i)
+					if b.depth>maxDepth then
+						maxDepth=b.depth
+						argMax=i
+					end
+				end
+				local velMarginStrengthO=useCase.velMarginStrength or 1.0
+				local b=w.bases(argMax)
+				--local relvel=b.relvel:copy()+(useCase.maxPenetratingVel or 0)*b.normal
+				-- add velocity-dependent margin
+				local velMarginOffset=useCase.velMarginOffset or 18
+				local maxPenetratingVel=useCase.maxPenetratingVel or 0
+				for i=0, w.bases:size()-1 do
+					local b=w.bases(i)
+					local relvel=b.relvel:copy()+maxPenetratingVel *b.normal
+					local velMarginStrength=velMarginStrengthO
+					local offset=0
+					if i~=argMax then 
+						--velMarginStrength=0 
+						offset=velMarginOffset-- turn off acceleration cone bound (friction cones still are turned on)
+					else
+						--if relvel.y>0.01 then relvel:scale(0.01/relvel.y) end
+					end
+					local dp=b.normal:dotProduct(relvel)
+					local projectionOfRelvel =dp*self.dtinv*velMarginStrength
+					local gi=b.globalIndex
+					if not excludeNormalBasis then
+						w.ci0:set(gi, w.ci0(gi)+projectionOfRelvel+offset)
+					end
+					for j=0, b.frictionNormal:size()-1 do
+						projectionOfRelvel=b.frictionNormal(j):dotProduct(relvel)*self.dtinv*velMarginStrength
+						gi=b.globalFrictionIndex+j-giOffset
+						w.ci0:set(gi, w.ci0(gi)+projectionOfRelvel+offset)
+					end
+				end
+			elseif not useCase.useSoftContactModel then
+				-- cmargin dependent
+				local cmargin=useCase.contactMargin or 0.005
+				local velMarginStrength=useCase.velMarginStrength or 1.0
+				local maxPenetratingVel=useCase.maxPenetratingVel or 0
+				local dtinv=self.dtinv
+				-- add velocity-dependent margin
+				for i=0, w.accbases:size()-1 do
+					local b=w.accbases(i)
+					local dp=b.normal:dotProduct(b.relvel)
+
+					local cmargin_dep_max_penetrating_vel
+					if b.depth>cmargin then
+						--cmargin_dep_max_penetrating_vel =maxPenetratingVel 
+						cmargin_dep_max_penetrating_vel =maxPenetratingVel +sop.clampMap(b.depth, cmargin, cmargin*1.5, cmargin*dtinv, 0)
+					else
+						--cmargin_dep_max_penetrating_vel =maxPenetratingVel + sop.clampMap(b.depth ,0, cmargin, cmargin*dtinv, 0) 
+						cmargin_dep_max_penetrating_vel =maxPenetratingVel + cmargin*dtinv 
+					end
+					local relvel=b.relvel:copy()+cmargin_dep_max_penetrating_vel*b.normal
+					local projectionOfRelvel=b.normal:dotProduct(relvel)*dtinv
+					local gi=b.globalIndex
+					if not excludeNormalBasis then
+						w.ci0:set(gi, w.ci0(gi)+projectionOfRelvel)
+					end
+					for j=0, b.frictionNormal:size()-1 do
+						--print(b.normal, b.frictionNormal(j))
+						--projectionOfRelvel=(b.frictionNormal(j):dotProduct(relvel)+maxPenetratingVel)*dtinv*velMarginStrength -- allows slight foot slipping
+						projectionOfRelvel=b.frictionNormal(j):dotProduct(relvel)*dtinv*velMarginStrength -- do not allow foot slipping
+						local gi=b.globalFrictionIndex+j-giOffset
+						w.ci0:set(gi, w.ci0(gi)+projectionOfRelvel)
+					end
+				end
+			--hwangpil
+			elseif true then
+				-- soft contact model
+				local cmargin=useCase.contactMargin or 0.005
+				local maxDepth=0.015
+				local dtinv=self.dtinv
+
+				for i=0, w.accbases:size()-1 do
+					local b=w.accbases(i)
+					local dp=b.normal:dotProduct(b.relvel)
+					local depthMargin=b.depth-maxDepth
+
+					local cmargin_dep_max_penetrating_vel
+
+					if depthMargin >= 0 then
+						cmargin_dep_max_penetrating_vel = -1*depthMargin*dtinv
+					elseif b.depth>cmargin then
+					--else
+						cmargin_dep_max_penetrating_vel = -1*depthMargin*dtinv
+						--cmargin_dep_max_penetrating_vel = sop.clampMap(b.depth, cmargin, cmargin*1.5, cmargin*dtinv, 0)
+
+					else
+						cmargin_dep_max_penetrating_vel = cmargin*dtinv
+					end
+
+					local relvel = b.relvel:copy() + cmargin_dep_max_penetrating_vel*b.normal
+					local projectionOfRelvel=b.normal:dotProduct(relvel)*dtinv
+					local gi=b.globalIndex
+					if not excludeNormalBasis then
+						w.ci0:set(gi, w.ci0(gi)+projectionOfRelvel)
+					end
+					for j=0, b.frictionNormal:size()-1 do
+						projectionOfRelvel=b.frictionNormal(j):dotProduct(relvel)*dtinv
+						local gi=b.globalFrictionIndex+j-giOffset
+						w.ci0:set(gi, w.ci0(gi)+projectionOfRelvel)
+					end
+				end
+			--/hwangpil
+			else
+
+				local velMarginStrengthO=useCase.velMarginStrength or 1.0
+				-- add velocity-dependent margin
+				for i=0, w.bases:size()-1 do
+					local b=w.bases(i)
+					local cduration= state.contactDuration[b.ilinkpair+1]
+					--local velMarginStrength=sop.clampMap(cduration, 0,15, 0,1)
+					--local velMarginStrength=sop.clampMap(b.depth, 0.015, 0, 0.7,0.2)
+					--b.relvel.x=b.relvel.x*0.7
+					--b.relvel.y=b.relvel.y*velMarginStrength
+					--b.relvel.z=b.relvel.z*0.7
+					local relvel=b.relvel:copy()+maxPenetratingVel *b.normal
+					local velMarginStrength=velMarginStrengthO
+					--if relvel.y>0 then velMarginStrength=0 end
+					local dp=b.normal:dotProduct(relvel)
+					local projectionOfRelvel =dp*self.dtinv*velMarginStrength
+					--local projectionOfRelvel=b.normal:dotProduct(relvel)*self.dtinv
+					local gi=b.globalIndex
+					if not excludeNormalBasis then
+						w.ci0:set(gi, w.ci0(gi)+projectionOfRelvel)
+					end
+					for j=0, b.frictionNormal:size()-1 do
+						projectionOfRelvel=b.frictionNormal(j):dotProduct(relvel)*self.dtinv*velMarginStrength
+						gi=b.globalFrictionIndex+j-giOffset
+						w.ci0:set(gi, w.ci0(gi)+projectionOfRelvel)
+					end
+				end
+			end
+
+			-- minimize complementory cost (minimize (lambda *  (a*ddq+b)))
+			--qp:addComplementory3(500,totalDIM, numActualDOF*2,numActualDOF*2+cdim, w.CI:sub(0, w.VtJ:rows(), 0, 0), w.ci0:range(0, w.VtJ:rows()):column())
+			--self:addCOMobjective(simulator, vector3(-100,0,1))
+		end
+		-- set equality constraints  
+		--
+		-- w.M*ddq - tau - JtV* lambda = w.b
+		--> (w.M -I -JtV)(ddq;tau;lambda) = w.b
+		--
+		w.CE:setSize(numActualDOF+6, totalDIM)
+		w.CE:sub(0,numActualDOF,0,numActualDOF):assign(w.M)
+		local minusI=w.CE:sub(0,numActualDOF,numActualDOF,numActualDOF*2)
+		minusI:identity()
+		minusI:rmult(-1)
+		local minusJtV=w.CE:sub(0,numActualDOF, numActualDOF*2, totalDIM)
+		minusJtV:assign(w.JtV)
+		minusJtV:rmult(-1)
+		-- constrain tau[0:6]=0
+		w.CE:sub(numActualDOF, numActualDOF+6):setAllValue(0)
+		w.CE:sub(numActualDOF, numActualDOF+6, numActualDOF, numActualDOF+6):identity()
+		w.ce0:setSize(numActualDOF+6)
+		w.ce0:range(0,numActualDOF):assign(w.b)
+		w.ce0:range(numActualDOF,numActualDOF+6):setAllValue(0)
+
+		--##dos
+if g_debugOneStep then --##dos
+g_debugOneStep:pushBack({qp.H:copy(), qp.R:copy()}) --##dos
+end
+		-- print(self.controlforce)
+		-- self:addPDtorque(simulator)
+		-- dbg.console()
+		
+	else
+		local totalDIM=numActualDOF*2 -- ddq and tau
+		local qp=HessianQuadratic(totalDIM)
+		self.qp=qp
+		-- dbg.console()
+		-- minimize desired acc error
+		if false then --self.excludeRoot then
+			local w=1
+			for i=0,3 do -- root
+				qp:addD(w,i,self.desiredacceleration(i+4))
+			end
+			for i=3,6 do -- root
+				qp:addD(w,i,self.desiredacceleration(i-3))
+			end
+		else
+			for i=0,3 do -- root
+				qp:addD(10000,i,self.desiredacceleration(i+4))
+			end
+			for i=3,6 do -- root
+				qp:addD(10000,i,self.desiredacceleration(i-3))
+			end
+		end
+
+		for i=6,numActualDOF-1 do
+			qp:addD(1000,i,self.desiredacceleration(i+1))
+		end
+		for i=0,numActualDOF-1 do
+			qp:addD(1,i+numActualDOF,0)
+		end
+		w.CE:setSize(numActualDOF+6, numActualDOF*2)
+		w.CE:sub(0,numActualDOF,0,numActualDOF):assign(w.M)
+		local minusI=w.CE:sub(0,numActualDOF,numActualDOF,numActualDOF*2)
+		minusI:identity()
+		minusI:rmult(-1)
+		-- constrain tau[0:6]=0
+		w.CE:sub(numActualDOF, numActualDOF+6):setAllValue(0)
+		w.CE:sub(numActualDOF, numActualDOF+6, numActualDOF, numActualDOF+6):identity()
+		w.ce0:setSize(numActualDOF+6)
+		w.ce0:range(0,numActualDOF):assign(w.b)
+		w.ce0:range(numActualDOF,numActualDOF+6):setAllValue(0)
+		w.CI:setSize(0,0)
+		w.ci0:setSize(0)
+
+		--print('desiredacc', self.desiredacceleration)
+		--print(w.ce0, w.b, w.ci0)
+		--this("exit",1)
+	end
+	if true then
+		-- clamp knee angle
+		-- acceleration bounds
+		-- acc > minAcc
+		local CI_cols=w.CI:cols()
+		if w.CI:rows()==0 then
+			CI_cols=numActualDOF*2
+		end
+		local angleBound=math.rad(-2)
+		local minAcc=0
+		local maxAcc=100
+		RE.output2('kneeDOF', self.theta(self.lkneeDOF), self.theta(self.rkneeDOF), self.dtheta(self.lkneeDOF), self.dtheta(self.rkneeDOF))
+
+		local knees={self.lkneeDOF, self.rkneeDOF}
+		for iknee,idof in ipairs(knees) do
+			if self.theta(idof)<angleBound then
+				local idq=self.dofInfo:DOFtoDQ(idof)
+				w.CI:resize(w.CI:rows()+1, CI_cols)
+				local ci0=w.ci0
+				ci0:resize(ci0:size()+1)
+				local lastRow=w.CI:row(w.CI:rows()-1)
+				-- acc- minAcc>0
+				lastRow:setAllValue(0)
+				lastRow:set(idq,1)
+				-- 0.5a*t^2=angleBound-self.theta(idof) 인 a찾자. 
+				--minAcc=2*(angleBound-self.theta(idof))/(0.1*0.1)
+				local vel=self.dtheta(idof)
+				if vel<0 then
+					--ci0:set(iknee-1, math.min(minAcc-vel*self.dtinv*0.5, maxAcc)*-1)
+					ci0:set(ci0:size()-1, (minAcc)*-1)
+				else
+					ci0:set(ci0:size()-1, minAcc*-1)
+				end
+			end
+		end
+
+		--local www=self.weight2:range(7,numActualDOF+1)
+		--w.ci0:range(start, start+numConTau):assign(maxTorque*www)
+		---- tau+maxTorque>0
+		--w.CI:sub(start+numConTau, start+numConTau*2, startc+6, startc+numActualDOF):identity()
+		----w.ci0:range(start+numConTau, start+numConTau*2):setAllValue(maxTorque)
+		--w.ci0:range(start+numConTau, start+numConTau*2):assign(maxTorque*www)
+	end
+
+	--_checkpoints:pushBack(deepCopyTable({'ce',w.CE, w.ce0}))
+	local state=self.state
+	local perClassContactMargin=useCase.perClassContactMargin==1 
+	if not perClassContactMargin then -- dynamic adjustment of collision margin
+		local cmargin=useCase.contactMargin or 0.005
+		for i=1, self.numCLinks do
+			if state.prevContact[i] and not state.contact[i] then
+				simulator:setCollisionMargin(i-1, 0) 
+				--RE.output2('contactmargin'..i,'0')
+				state.contactDuration[i]=0
+			elseif not state.prevContact[i] and state.contact[i] then
+				simulator:setCollisionMargin(i-1, cmargin) -- allow some penetration
+				--RE.output2('contactmargin'..i,'1')
+				--simulator:setCollisionMargin(i-1, 0.013) -- allow some penetration
+				state.contactDuration[i]=0
+			elseif state.contact[i] then
+				state.contactDuration[i]=state.contactDuration[i]+1
+			end
+		end
+	else
+		-- per class
+		local prevContact={L=false,R=false,LH=false,RH=false,O=false}
+		local contact={L=false,R=false,LH=false,RH=false,O=false}
+		local targets={L={},R={}, LH={}, RH={}, O={}}
+		for i=1, self.numCLinks do
+			local cls=state.contactClass[i]
+			prevContact[cls]=prevContact[cls] or state.prevContact[i]
+			contact[cls]=contact[cls] or state.contact[i]
+			array.pushBack(targets[cls],i)
+		end
+		RE.output2('prevContact', prevContact.L, prevContact.R)
+		RE.output2('Contact', contact.L, contact.R)
+		RE.output2('ContactState',state.contact[1], state.contact[2], state.contact[3], state.contact[4]
+		,state.contact[5], state.contact[6], state.contact[7], state.contact[8])
+		local cmargin=useCase.contactMargin or 0.005
+		for icls,cls in ipairs({"L","R","LH","RH"}) do
+			if prevContact[cls] and not contact[cls] then
+				for ii,i in ipairs(targets[cls]) do
+					simulator:setCollisionMargin(i-1, 0) 
+				end
+			elseif not prevContact[cls] and contact[cls] then
+				for ii,i in ipairs(targets[cls]) do
+					simulator:setCollisionMargin(i-1, cmargin) -- allow some penetration
+				end
+			end
+		end
+	end
+	RE.output2("contactDuration", table.tostring(state.contactDuration))
+	--_checkpoints:pushBack(deepCopyTable({'cte', prevContact, contact, state}))
+	--self:addCOMobjective(simulator, vector3(30,0,10))
+		--##dos
+if g_debugOneStep then --##dos
+g_debugOneStep:pushBack({"qpE",self.qp.H:copy(), self.qp.R:copy()}) --##dos
+end
+end
+
+function QPservo:calcContactCentroid(sim, graph, swingFoot)
+	local simulator=self.simulator
+	local contactHull=self.contactHull
+	assert(contactHull)
+	--assert(contactHull.N>=1)
+	if contactHull.N==0 then RE.output2("warning","contactHull.N==0") end
+
+	if swingFoot~="L" then
+		local frameL=simulator:getWorldState(0):globalFrame(graph.lfoot)
+		-- it's safe to include the current heel and toe positions in the support polygon. 
+		-- This allows faster swiching between heel and toe supports.
+		contactHull:addVector3(frameL.translation)
+		contactHull:addVector3(frameL:toGlobalPos(graph.lfootpos))
+	end
+
+	if swingFoot~="R" then
+		local frameR=simulator:getWorldState(0):globalFrame(graph.rfoot)
+		contactHull:addVector3(frameR.translation)
+		contactHull:addVector3(frameR:toGlobalPos(graph.rfootpos))
+	end
+
+	contactHull:buildHull()
+
+	local centroid, area=contactHull:calcCentroid()
+	centroid=vector3(centroid.x, 0, centroid.y)
+	return centroid
+end
+
+function QPservo:rewindTargetMotion(sim)
+	local simulator=self.simulator
+	self.deltaTime=-1*simulator:currentTime()
+end
+
+

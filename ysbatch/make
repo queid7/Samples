@@ -1,0 +1,4 @@
+#!lua
+EXE='yssample1'
+
+dofile('../make.lua')

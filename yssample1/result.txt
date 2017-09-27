@@ -1,0 +1,1246 @@
+cd ../../work;./yssample1
+Xdbe not supported, faking double buffer with pixmaps.
+pFileName=../Resource/motion.lua
+pFileName=../Resource/loader.lua
+test:(null)
+aspect Ratio 1.333333
+pFileName=../Resource/scripts/loadBG_muscle.lua
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+cparam:./yssample1
+Edge(75,73): the number of face edges is larger than 2
+Edge(77,75): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(73,75): the number of face edges is larger than 2
+Edge(75,77): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(88,89): the number of face edges is larger than 2
+Edge(102,88): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(102,89): the number of face edges is larger than 2
+Edge(89,88): the number of face edges is larger than 2
+Edge(88,102): the number of face edges is larger than 2
+Warning! total 3 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(1,0): the number of face edges is larger than 2
+Edge(0,10): the number of face edges is larger than 2
+Edge(10,0): the number of face edges is larger than 2
+Edge(7,10): the number of face edges is larger than 2
+Edge(10,7): the number of face edges is larger than 2
+Edge(1,6): the number of face edges is larger than 2
+Edge(6,1): the number of face edges is larger than 2
+Edge(7,14): the number of face edges is larger than 2
+Edge(27,26): the number of face edges is larger than 2
+Edge(26,36): the number of face edges is larger than 2
+Edge(36,26): the number of face edges is larger than 2
+Edge(33,36): the number of face edges is larger than 2
+Edge(36,33): the number of face edges is larger than 2
+Edge(27,32): the number of face edges is larger than 2
+Edge(32,27): the number of face edges is larger than 2
+Edge(29,41): the number of face edges is larger than 2
+Edge(53,52): the number of face edges is larger than 2
+Edge(52,62): the number of face edges is larger than 2
+Edge(62,52): the number of face edges is larger than 2
+Edge(59,62): the number of face edges is larger than 2
+Edge(62,59): the number of face edges is larger than 2
+Edge(53,58): the number of face edges is larger than 2
+Edge(58,53): the number of face edges is larger than 2
+Edge(55,67): the number of face edges is larger than 2
+Edge(79,78): the number of face edges is larger than 2
+Edge(78,88): the number of face edges is larger than 2
+Edge(88,78): the number of face edges is larger than 2
+Edge(85,88): the number of face edges is larger than 2
+Edge(88,85): the number of face edges is larger than 2
+Edge(79,84): the number of face edges is larger than 2
+Edge(84,79): the number of face edges is larger than 2
+Edge(81,93): the number of face edges is larger than 2
+Edge(105,104): the number of face edges is larger than 2
+Edge(104,114): the number of face edges is larger than 2
+Edge(114,104): the number of face edges is larger than 2
+Edge(111,114): the number of face edges is larger than 2
+Edge(114,111): the number of face edges is larger than 2
+Edge(105,110): the number of face edges is larger than 2
+Edge(110,105): the number of face edges is larger than 2
+Edge(107,119): the number of face edges is larger than 2
+Edge(131,130): the number of face edges is larger than 2
+Edge(130,132): the number of face edges is larger than 2
+Edge(132,130): the number of face edges is larger than 2
+Edge(145,133): the number of face edges is larger than 2
+Edge(157,156): the number of face edges is larger than 2
+Edge(156,158): the number of face edges is larger than 2
+Edge(158,156): the number of face edges is larger than 2
+Edge(171,159): the number of face edges is larger than 2
+Edge(183,182): the number of face edges is larger than 2
+Edge(182,184): the number of face edges is larger than 2
+Edge(184,182): the number of face edges is larger than 2
+Edge(197,185): the number of face edges is larger than 2
+Edge(209,208): the number of face edges is larger than 2
+Edge(208,210): the number of face edges is larger than 2
+Edge(210,208): the number of face edges is larger than 2
+Edge(223,211): the number of face edges is larger than 2
+Edge(235,234): the number of face edges is larger than 2
+Edge(234,236): the number of face edges is larger than 2
+Edge(236,234): the number of face edges is larger than 2
+Edge(249,237): the number of face edges is larger than 2
+Edge(265,260): the number of face edges is larger than 2
+Edge(276,277): the number of face edges is larger than 2
+Edge(287,286): the number of face edges is larger than 2
+Edge(286,288): the number of face edges is larger than 2
+Edge(288,286): the number of face edges is larger than 2
+Edge(301,289): the number of face edges is larger than 2
+Edge(313,312): the number of face edges is larger than 2
+Edge(312,322): the number of face edges is larger than 2
+Edge(322,312): the number of face edges is larger than 2
+Edge(319,322): the number of face edges is larger than 2
+Edge(322,319): the number of face edges is larger than 2
+Edge(313,318): the number of face edges is larger than 2
+Edge(318,313): the number of face edges is larger than 2
+Edge(315,327): the number of face edges is larger than 2
+Edge(339,338): the number of face edges is larger than 2
+Edge(338,348): the number of face edges is larger than 2
+Edge(348,338): the number of face edges is larger than 2
+Edge(345,348): the number of face edges is larger than 2
+Edge(348,345): the number of face edges is larger than 2
+Edge(339,344): the number of face edges is larger than 2
+Edge(344,339): the number of face edges is larger than 2
+Edge(341,353): the number of face edges is larger than 2
+Edge(365,364): the number of face edges is larger than 2
+Edge(364,366): the number of face edges is larger than 2
+Edge(366,364): the number of face edges is larger than 2
+Edge(379,367): the number of face edges is larger than 2
+Edge(391,390): the number of face edges is larger than 2
+Edge(390,392): the number of face edges is larger than 2
+Edge(392,390): the number of face edges is larger than 2
+Edge(405,393): the number of face edges is larger than 2
+Edge(417,416): the number of face edges is larger than 2
+Edge(416,426): the number of face edges is larger than 2
+Edge(426,416): the number of face edges is larger than 2
+Edge(423,426): the number of face edges is larger than 2
+Edge(426,423): the number of face edges is larger than 2
+Edge(417,422): the number of face edges is larger than 2
+Edge(422,417): the number of face edges is larger than 2
+Edge(419,431): the number of face edges is larger than 2
+Edge(443,442): the number of face edges is larger than 2
+Edge(442,444): the number of face edges is larger than 2
+Edge(444,442): the number of face edges is larger than 2
+Edge(457,445): the number of face edges is larger than 2
+Edge(457,459): the number of face edges is larger than 2
+Edge(468,469): the number of face edges is larger than 2
+Edge(477,468): the number of face edges is larger than 2
+Edge(474,475): the number of face edges is larger than 2
+Edge(491,492): the number of face edges is larger than 2
+Edge(495,494): the number of face edges is larger than 2
+Edge(494,496): the number of face edges is larger than 2
+Edge(496,494): the number of face edges is larger than 2
+Edge(509,497): the number of face edges is larger than 2
+Edge(521,520): the number of face edges is larger than 2
+Edge(520,522): the number of face edges is larger than 2
+Edge(522,520): the number of face edges is larger than 2
+Edge(535,523): the number of face edges is larger than 2
+Edge(547,546): the number of face edges is larger than 2
+Edge(546,548): the number of face edges is larger than 2
+Edge(548,546): the number of face edges is larger than 2
+Edge(561,549): the number of face edges is larger than 2
+Edge(575,584): the number of face edges is larger than 2
+Edge(590,578): the number of face edges is larger than 2
+Edge(578,577): the number of face edges is larger than 2
+Edge(577,590): the number of face edges is larger than 2
+Edge(590,577): the number of face edges is larger than 2
+Warning! total 124 edges have more than 2 face edges
+Edge(47,49): the number of face edges is larger than 2
+Edge(49,47): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(275,274): the number of face edges is larger than 2
+Edge(274,275): the number of face edges is larger than 2
+Edge(419,338): the number of face edges is larger than 2
+Edge(338,419): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,415): the number of face edges is larger than 2
+Edge(570,414): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,570): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(688,524): the number of face edges is larger than 2
+Edge(524,526): the number of face edges is larger than 2
+Edge(696,695): the number of face edges is larger than 2
+Edge(695,688): the number of face edges is larger than 2
+Edge(1096,1097): the number of face edges is larger than 2
+Edge(1099,1100): the number of face edges is larger than 2
+Edge(1097,1098): the number of face edges is larger than 2
+Edge(1098,1099): the number of face edges is larger than 2
+Warning! total 19 edges have more than 2 face edges
+BoundaryVertex??????
+#dof	25
+#muscle	92
+#dof	25
+#muscle	80
+original f_m_o
+{1:819, 2:573, 3:653, 4:270, 5:285, 6:323, 7:1288, 8:410, 9:896, 10:804, 11:156, 12:627, 13:429, 14:381, 15:343, 16:488, 17:233, 18:266, 19:162, 20:573, 21:819, 22:552, 23:1073, 24:1113, 25:381, 26:164, 27:444, 28:1169, 29:1294, 30:1365, 31:1871, 32:819, 33:573, 34:653, 35:270, 36:285, 37:323, 38:1288, 39:410, 40:896, 41:804, 42:156, 43:627, 44:429, 45:381, 46:343, 47:488, 48:233, 49:266, 50:162, 51:573, 52:819, 53:552, 54:1073, 55:1113, 56:381, 57:164, 58:444, 59:1169, 60:1294, 61:1365, 62:1871, 63:1558, 64:683, 65:3549, 66:1588, 67:310, 68:322, 69:905, 70:435, 71:943, 72:180, 73:512, 74:162, 75:2500, 76:2500, 77:900, 78:900, 79:900, 80:900, }
+Edge(75,73): the number of face edges is larger than 2
+Edge(77,75): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(73,75): the number of face edges is larger than 2
+Edge(75,77): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(88,89): the number of face edges is larger than 2
+Edge(102,88): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(102,89): the number of face edges is larger than 2
+Edge(89,88): the number of face edges is larger than 2
+Edge(88,102): the number of face edges is larger than 2
+Warning! total 3 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(1,0): the number of face edges is larger than 2
+Edge(0,10): the number of face edges is larger than 2
+Edge(10,0): the number of face edges is larger than 2
+Edge(7,10): the number of face edges is larger than 2
+Edge(10,7): the number of face edges is larger than 2
+Edge(1,6): the number of face edges is larger than 2
+Edge(6,1): the number of face edges is larger than 2
+Edge(7,14): the number of face edges is larger than 2
+Edge(27,26): the number of face edges is larger than 2
+Edge(26,36): the number of face edges is larger than 2
+Edge(36,26): the number of face edges is larger than 2
+Edge(33,36): the number of face edges is larger than 2
+Edge(36,33): the number of face edges is larger than 2
+Edge(27,32): the number of face edges is larger than 2
+Edge(32,27): the number of face edges is larger than 2
+Edge(29,41): the number of face edges is larger than 2
+Edge(53,52): the number of face edges is larger than 2
+Edge(52,62): the number of face edges is larger than 2
+Edge(62,52): the number of face edges is larger than 2
+Edge(59,62): the number of face edges is larger than 2
+Edge(62,59): the number of face edges is larger than 2
+Edge(53,58): the number of face edges is larger than 2
+Edge(58,53): the number of face edges is larger than 2
+Edge(55,67): the number of face edges is larger than 2
+Edge(79,78): the number of face edges is larger than 2
+Edge(78,88): the number of face edges is larger than 2
+Edge(88,78): the number of face edges is larger than 2
+Edge(85,88): the number of face edges is larger than 2
+Edge(88,85): the number of face edges is larger than 2
+Edge(79,84): the number of face edges is larger than 2
+Edge(84,79): the number of face edges is larger than 2
+Edge(81,93): the number of face edges is larger than 2
+Edge(105,104): the number of face edges is larger than 2
+Edge(104,114): the number of face edges is larger than 2
+Edge(114,104): the number of face edges is larger than 2
+Edge(111,114): the number of face edges is larger than 2
+Edge(114,111): the number of face edges is larger than 2
+Edge(105,110): the number of face edges is larger than 2
+Edge(110,105): the number of face edges is larger than 2
+Edge(107,119): the number of face edges is larger than 2
+Edge(131,130): the number of face edges is larger than 2
+Edge(130,132): the number of face edges is larger than 2
+Edge(132,130): the number of face edges is larger than 2
+Edge(145,133): the number of face edges is larger than 2
+Edge(157,156): the number of face edges is larger than 2
+Edge(156,158): the number of face edges is larger than 2
+Edge(158,156): the number of face edges is larger than 2
+Edge(171,159): the number of face edges is larger than 2
+Edge(183,182): the number of face edges is larger than 2
+Edge(182,184): the number of face edges is larger than 2
+Edge(184,182): the number of face edges is larger than 2
+Edge(197,185): the number of face edges is larger than 2
+Edge(209,208): the number of face edges is larger than 2
+Edge(208,210): the number of face edges is larger than 2
+Edge(210,208): the number of face edges is larger than 2
+Edge(223,211): the number of face edges is larger than 2
+Edge(235,234): the number of face edges is larger than 2
+Edge(234,236): the number of face edges is larger than 2
+Edge(236,234): the number of face edges is larger than 2
+Edge(249,237): the number of face edges is larger than 2
+Edge(265,260): the number of face edges is larger than 2
+Edge(276,277): the number of face edges is larger than 2
+Edge(287,286): the number of face edges is larger than 2
+Edge(286,288): the number of face edges is larger than 2
+Edge(288,286): the number of face edges is larger than 2
+Edge(301,289): the number of face edges is larger than 2
+Edge(313,312): the number of face edges is larger than 2
+Edge(312,322): the number of face edges is larger than 2
+Edge(322,312): the number of face edges is larger than 2
+Edge(319,322): the number of face edges is larger than 2
+Edge(322,319): the number of face edges is larger than 2
+Edge(313,318): the number of face edges is larger than 2
+Edge(318,313): the number of face edges is larger than 2
+Edge(315,327): the number of face edges is larger than 2
+Edge(339,338): the number of face edges is larger than 2
+Edge(338,348): the number of face edges is larger than 2
+Edge(348,338): the number of face edges is larger than 2
+Edge(345,348): the number of face edges is larger than 2
+Edge(348,345): the number of face edges is larger than 2
+Edge(339,344): the number of face edges is larger than 2
+Edge(344,339): the number of face edges is larger than 2
+Edge(341,353): the number of face edges is larger than 2
+Edge(365,364): the number of face edges is larger than 2
+Edge(364,366): the number of face edges is larger than 2
+Edge(366,364): the number of face edges is larger than 2
+Edge(379,367): the number of face edges is larger than 2
+Edge(391,390): the number of face edges is larger than 2
+Edge(390,392): the number of face edges is larger than 2
+Edge(392,390): the number of face edges is larger than 2
+Edge(405,393): the number of face edges is larger than 2
+Edge(417,416): the number of face edges is larger than 2
+Edge(416,426): the number of face edges is larger than 2
+Edge(426,416): the number of face edges is larger than 2
+Edge(423,426): the number of face edges is larger than 2
+Edge(426,423): the number of face edges is larger than 2
+Edge(417,422): the number of face edges is larger than 2
+Edge(422,417): the number of face edges is larger than 2
+Edge(419,431): the number of face edges is larger than 2
+Edge(443,442): the number of face edges is larger than 2
+Edge(442,444): the number of face edges is larger than 2
+Edge(444,442): the number of face edges is larger than 2
+Edge(457,445): the number of face edges is larger than 2
+Edge(457,459): the number of face edges is larger than 2
+Edge(468,469): the number of face edges is larger than 2
+Edge(477,468): the number of face edges is larger than 2
+Edge(474,475): the number of face edges is larger than 2
+Edge(491,492): the number of face edges is larger than 2
+Edge(495,494): the number of face edges is larger than 2
+Edge(494,496): the number of face edges is larger than 2
+Edge(496,494): the number of face edges is larger than 2
+Edge(509,497): the number of face edges is larger than 2
+Edge(521,520): the number of face edges is larger than 2
+Edge(520,522): the number of face edges is larger than 2
+Edge(522,520): the number of face edges is larger than 2
+Edge(535,523): the number of face edges is larger than 2
+Edge(547,546): the number of face edges is larger than 2
+Edge(546,548): the number of face edges is larger than 2
+Edge(548,546): the number of face edges is larger than 2
+Edge(561,549): the number of face edges is larger than 2
+Edge(575,584): the number of face edges is larger than 2
+Edge(590,578): the number of face edges is larger than 2
+Edge(578,577): the number of face edges is larger than 2
+Edge(577,590): the number of face edges is larger than 2
+Edge(590,577): the number of face edges is larger than 2
+Warning! total 124 edges have more than 2 face edges
+Edge(47,49): the number of face edges is larger than 2
+Edge(49,47): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(275,274): the number of face edges is larger than 2
+Edge(274,275): the number of face edges is larger than 2
+Edge(419,338): the number of face edges is larger than 2
+Edge(338,419): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,415): the number of face edges is larger than 2
+Edge(570,414): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,570): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(688,524): the number of face edges is larger than 2
+Edge(524,526): the number of face edges is larger than 2
+Edge(696,695): the number of face edges is larger than 2
+Edge(695,688): the number of face edges is larger than 2
+Edge(1096,1097): the number of face edges is larger than 2
+Edge(1099,1100): the number of face edges is larger than 2
+Edge(1097,1098): the number of face edges is larger than 2
+Edge(1098,1099): the number of face edges is larger than 2
+Warning! total 19 edges have more than 2 face edges
+BoundaryVertex??????
+533	533
+Edge(75,73): the number of face edges is larger than 2
+Edge(77,75): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(73,75): the number of face edges is larger than 2
+Edge(75,77): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(88,89): the number of face edges is larger than 2
+Edge(102,88): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(102,89): the number of face edges is larger than 2
+Edge(89,88): the number of face edges is larger than 2
+Edge(88,102): the number of face edges is larger than 2
+Warning! total 3 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(1,0): the number of face edges is larger than 2
+Edge(0,10): the number of face edges is larger than 2
+Edge(10,0): the number of face edges is larger than 2
+Edge(7,10): the number of face edges is larger than 2
+Edge(10,7): the number of face edges is larger than 2
+Edge(1,6): the number of face edges is larger than 2
+Edge(6,1): the number of face edges is larger than 2
+Edge(7,14): the number of face edges is larger than 2
+Edge(27,26): the number of face edges is larger than 2
+Edge(26,36): the number of face edges is larger than 2
+Edge(36,26): the number of face edges is larger than 2
+Edge(33,36): the number of face edges is larger than 2
+Edge(36,33): the number of face edges is larger than 2
+Edge(27,32): the number of face edges is larger than 2
+Edge(32,27): the number of face edges is larger than 2
+Edge(29,41): the number of face edges is larger than 2
+Edge(53,52): the number of face edges is larger than 2
+Edge(52,62): the number of face edges is larger than 2
+Edge(62,52): the number of face edges is larger than 2
+Edge(59,62): the number of face edges is larger than 2
+Edge(62,59): the number of face edges is larger than 2
+Edge(53,58): the number of face edges is larger than 2
+Edge(58,53): the number of face edges is larger than 2
+Edge(55,67): the number of face edges is larger than 2
+Edge(79,78): the number of face edges is larger than 2
+Edge(78,88): the number of face edges is larger than 2
+Edge(88,78): the number of face edges is larger than 2
+Edge(85,88): the number of face edges is larger than 2
+Edge(88,85): the number of face edges is larger than 2
+Edge(79,84): the number of face edges is larger than 2
+Edge(84,79): the number of face edges is larger than 2
+Edge(81,93): the number of face edges is larger than 2
+Edge(105,104): the number of face edges is larger than 2
+Edge(104,114): the number of face edges is larger than 2
+Edge(114,104): the number of face edges is larger than 2
+Edge(111,114): the number of face edges is larger than 2
+Edge(114,111): the number of face edges is larger than 2
+Edge(105,110): the number of face edges is larger than 2
+Edge(110,105): the number of face edges is larger than 2
+Edge(107,119): the number of face edges is larger than 2
+Edge(131,130): the number of face edges is larger than 2
+Edge(130,132): the number of face edges is larger than 2
+Edge(132,130): the number of face edges is larger than 2
+Edge(145,133): the number of face edges is larger than 2
+Edge(157,156): the number of face edges is larger than 2
+Edge(156,158): the number of face edges is larger than 2
+Edge(158,156): the number of face edges is larger than 2
+Edge(171,159): the number of face edges is larger than 2
+Edge(183,182): the number of face edges is larger than 2
+Edge(182,184): the number of face edges is larger than 2
+Edge(184,182): the number of face edges is larger than 2
+Edge(197,185): the number of face edges is larger than 2
+Edge(209,208): the number of face edges is larger than 2
+Edge(208,210): the number of face edges is larger than 2
+Edge(210,208): the number of face edges is larger than 2
+Edge(223,211): the number of face edges is larger than 2
+Edge(235,234): the number of face edges is larger than 2
+Edge(234,236): the number of face edges is larger than 2
+Edge(236,234): the number of face edges is larger than 2
+Edge(249,237): the number of face edges is larger than 2
+Edge(265,260): the number of face edges is larger than 2
+Edge(276,277): the number of face edges is larger than 2
+Edge(287,286): the number of face edges is larger than 2
+Edge(286,288): the number of face edges is larger than 2
+Edge(288,286): the number of face edges is larger than 2
+Edge(301,289): the number of face edges is larger than 2
+Edge(313,312): the number of face edges is larger than 2
+Edge(312,322): the number of face edges is larger than 2
+Edge(322,312): the number of face edges is larger than 2
+Edge(319,322): the number of face edges is larger than 2
+Edge(322,319): the number of face edges is larger than 2
+Edge(313,318): the number of face edges is larger than 2
+Edge(318,313): the number of face edges is larger than 2
+Edge(315,327): the number of face edges is larger than 2
+Edge(339,338): the number of face edges is larger than 2
+Edge(338,348): the number of face edges is larger than 2
+Edge(348,338): the number of face edges is larger than 2
+Edge(345,348): the number of face edges is larger than 2
+Edge(348,345): the number of face edges is larger than 2
+Edge(339,344): the number of face edges is larger than 2
+Edge(344,339): the number of face edges is larger than 2
+Edge(341,353): the number of face edges is larger than 2
+Edge(365,364): the number of face edges is larger than 2
+Edge(364,366): the number of face edges is larger than 2
+Edge(366,364): the number of face edges is larger than 2
+Edge(379,367): the number of face edges is larger than 2
+Edge(391,390): the number of face edges is larger than 2
+Edge(390,392): the number of face edges is larger than 2
+Edge(392,390): the number of face edges is larger than 2
+Edge(405,393): the number of face edges is larger than 2
+Edge(417,416): the number of face edges is larger than 2
+Edge(416,426): the number of face edges is larger than 2
+Edge(426,416): the number of face edges is larger than 2
+Edge(423,426): the number of face edges is larger than 2
+Edge(426,423): the number of face edges is larger than 2
+Edge(417,422): the number of face edges is larger than 2
+Edge(422,417): the number of face edges is larger than 2
+Edge(419,431): the number of face edges is larger than 2
+Edge(443,442): the number of face edges is larger than 2
+Edge(442,444): the number of face edges is larger than 2
+Edge(444,442): the number of face edges is larger than 2
+Edge(457,445): the number of face edges is larger than 2
+Edge(457,459): the number of face edges is larger than 2
+Edge(468,469): the number of face edges is larger than 2
+Edge(477,468): the number of face edges is larger than 2
+Edge(474,475): the number of face edges is larger than 2
+Edge(491,492): the number of face edges is larger than 2
+Edge(495,494): the number of face edges is larger than 2
+Edge(494,496): the number of face edges is larger than 2
+Edge(496,494): the number of face edges is larger than 2
+Edge(509,497): the number of face edges is larger than 2
+Edge(521,520): the number of face edges is larger than 2
+Edge(520,522): the number of face edges is larger than 2
+Edge(522,520): the number of face edges is larger than 2
+Edge(535,523): the number of face edges is larger than 2
+Edge(547,546): the number of face edges is larger than 2
+Edge(546,548): the number of face edges is larger than 2
+Edge(548,546): the number of face edges is larger than 2
+Edge(561,549): the number of face edges is larger than 2
+Edge(575,584): the number of face edges is larger than 2
+Edge(590,578): the number of face edges is larger than 2
+Edge(578,577): the number of face edges is larger than 2
+Edge(577,590): the number of face edges is larger than 2
+Edge(590,577): the number of face edges is larger than 2
+Warning! total 124 edges have more than 2 face edges
+Edge(47,49): the number of face edges is larger than 2
+Edge(49,47): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(275,274): the number of face edges is larger than 2
+Edge(274,275): the number of face edges is larger than 2
+Edge(419,338): the number of face edges is larger than 2
+Edge(338,419): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,415): the number of face edges is larger than 2
+Edge(570,414): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,570): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(688,524): the number of face edges is larger than 2
+Edge(524,526): the number of face edges is larger than 2
+Edge(696,695): the number of face edges is larger than 2
+Edge(695,688): the number of face edges is larger than 2
+Edge(1096,1097): the number of face edges is larger than 2
+Edge(1099,1100): the number of face edges is larger than 2
+Edge(1097,1098): the number of face edges is larger than 2
+Edge(1098,1099): the number of face edges is larger than 2
+Warning! total 19 edges have more than 2 face edges
+BoundaryVertex??????
+../Resource/motion/opensim/gait25_gait_repeat.zmpcom
+addModel untitled
+Box size 0.03 0.03 0.03
+Box size 0.04 1.7 0.04
+Cart	Pole
+1	59.999663	0.947889	13.643121
+Info:	{
+ {[0]={0.000, 0.000, 1.000, 0.000, }
+ {[1]={0.000, 0.000, 0.000, 1.000, }
+ {[2]={-0.000, 35.772, -0.000, -0.000, }
+ {[3]={-0.000, 38.367, -0.000, -0.000, }
+}
+	{
+ {[0]={0.000, }
+ {[1]={0.000, }
+ {[2]={0.076, }
+ {[3]={0.064, }
+}
+	{
+ {[0]={0.000, 0.000, 0.000, 0.000, }
+ {[1]={0.000, 30000.000, 0.000, 0.000, }
+ {[2]={0.000, 0.000, 30000.000, 0.000, }
+ {[3]={0.000, 0.000, 0.000, 0.000, }
+}
+	{
+ {[0]={1.000, }
+}
+	{
+ {[0]={0.000, 2080.019, -173.205, 533.054, }
+}
+
+Info:	{
+ {[0]={0.000, 0.000, 1.000, 0.000, }
+ {[1]={0.000, 0.000, 0.000, 1.000, }
+ {[2]={-0.000, 35.772, -0.000, -0.000, }
+ {[3]={-0.000, 38.367, -0.000, -0.000, }
+}
+	{
+ {[0]={0.000, }
+ {[1]={0.000, }
+ {[2]={0.076, }
+ {[3]={0.064, }
+}
+	{
+ {[0]={0.000, 0.000, 0.000, 0.000, }
+ {[1]={0.000, 30000.000, 0.000, 0.000, }
+ {[2]={0.000, 0.000, 30000.000, 0.000, }
+ {[3]={0.000, 0.000, 0.000, 0.000, }
+}
+	{
+ {[0]={1.000, }
+}
+	{
+ {[0]={0.000, 2080.019, -173.205, 533.054, }
+}
+
+Box size 0.03 0.03 0.03
+Box size 0.04 1.7 0.04
+Cart	Pole
+1	59.999663	0.947889	13.643121
+graph
+ground_pelvis numSubmesh 3
+knee_r numSubmesh 2
+ankle_r numSubmesh 12
+mtp_r numSubmesh 14
+knee_l numSubmesh 2
+ankle_l numSubmesh 12
+mtp_l numSubmesh 14
+back numSubmesh 28
+111
+111
+111
+111
+111
+111
+111
+111
+111
+111
+1
+setSeg	g2592_gait_art_leg	l
+setSeg	g2592_gait_art_leg	r
+setSeg	g2592_gait_art_leg	L1
+setSeg	g2592_gait_art_leg	R1
+setSeg	g2592_gait_art_leg	L2
+Physics start
+addModel untitled
+111
+111
+111
+111
+111
+111
+111
+111
+111
+111
+Box size 380 0.2 380
+addModel floor
+addModel untitled
+111
+111
+111
+111
+111
+111
+111
+111
+111
+111
+kp=	[]
+kd=	[]
+constructor end
+Edge(75,73): the number of face edges is larger than 2
+Edge(77,75): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(73,75): the number of face edges is larger than 2
+Edge(75,77): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(88,89): the number of face edges is larger than 2
+Edge(102,88): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(102,89): the number of face edges is larger than 2
+Edge(89,88): the number of face edges is larger than 2
+Edge(88,102): the number of face edges is larger than 2
+Warning! total 3 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(1,0): the number of face edges is larger than 2
+Edge(0,10): the number of face edges is larger than 2
+Edge(10,0): the number of face edges is larger than 2
+Edge(7,10): the number of face edges is larger than 2
+Edge(10,7): the number of face edges is larger than 2
+Edge(1,6): the number of face edges is larger than 2
+Edge(6,1): the number of face edges is larger than 2
+Edge(7,14): the number of face edges is larger than 2
+Edge(27,26): the number of face edges is larger than 2
+Edge(26,36): the number of face edges is larger than 2
+Edge(36,26): the number of face edges is larger than 2
+Edge(33,36): the number of face edges is larger than 2
+Edge(36,33): the number of face edges is larger than 2
+Edge(27,32): the number of face edges is larger than 2
+Edge(32,27): the number of face edges is larger than 2
+Edge(29,41): the number of face edges is larger than 2
+Edge(53,52): the number of face edges is larger than 2
+Edge(52,62): the number of face edges is larger than 2
+Edge(62,52): the number of face edges is larger than 2
+Edge(59,62): the number of face edges is larger than 2
+Edge(62,59): the number of face edges is larger than 2
+Edge(53,58): the number of face edges is larger than 2
+Edge(58,53): the number of face edges is larger than 2
+Edge(55,67): the number of face edges is larger than 2
+Edge(79,78): the number of face edges is larger than 2
+Edge(78,88): the number of face edges is larger than 2
+Edge(88,78): the number of face edges is larger than 2
+Edge(85,88): the number of face edges is larger than 2
+Edge(88,85): the number of face edges is larger than 2
+Edge(79,84): the number of face edges is larger than 2
+Edge(84,79): the number of face edges is larger than 2
+Edge(81,93): the number of face edges is larger than 2
+Edge(105,104): the number of face edges is larger than 2
+Edge(104,114): the number of face edges is larger than 2
+Edge(114,104): the number of face edges is larger than 2
+Edge(111,114): the number of face edges is larger than 2
+Edge(114,111): the number of face edges is larger than 2
+Edge(105,110): the number of face edges is larger than 2
+Edge(110,105): the number of face edges is larger than 2
+Edge(107,119): the number of face edges is larger than 2
+Edge(131,130): the number of face edges is larger than 2
+Edge(130,132): the number of face edges is larger than 2
+Edge(132,130): the number of face edges is larger than 2
+Edge(145,133): the number of face edges is larger than 2
+Edge(157,156): the number of face edges is larger than 2
+Edge(156,158): the number of face edges is larger than 2
+Edge(158,156): the number of face edges is larger than 2
+Edge(171,159): the number of face edges is larger than 2
+Edge(183,182): the number of face edges is larger than 2
+Edge(182,184): the number of face edges is larger than 2
+Edge(184,182): the number of face edges is larger than 2
+Edge(197,185): the number of face edges is larger than 2
+Edge(209,208): the number of face edges is larger than 2
+Edge(208,210): the number of face edges is larger than 2
+Edge(210,208): the number of face edges is larger than 2
+Edge(223,211): the number of face edges is larger than 2
+Edge(235,234): the number of face edges is larger than 2
+Edge(234,236): the number of face edges is larger than 2
+Edge(236,234): the number of face edges is larger than 2
+Edge(249,237): the number of face edges is larger than 2
+Edge(265,260): the number of face edges is larger than 2
+Edge(276,277): the number of face edges is larger than 2
+Edge(287,286): the number of face edges is larger than 2
+Edge(286,288): the number of face edges is larger than 2
+Edge(288,286): the number of face edges is larger than 2
+Edge(301,289): the number of face edges is larger than 2
+Edge(313,312): the number of face edges is larger than 2
+Edge(312,322): the number of face edges is larger than 2
+Edge(322,312): the number of face edges is larger than 2
+Edge(319,322): the number of face edges is larger than 2
+Edge(322,319): the number of face edges is larger than 2
+Edge(313,318): the number of face edges is larger than 2
+Edge(318,313): the number of face edges is larger than 2
+Edge(315,327): the number of face edges is larger than 2
+Edge(339,338): the number of face edges is larger than 2
+Edge(338,348): the number of face edges is larger than 2
+Edge(348,338): the number of face edges is larger than 2
+Edge(345,348): the number of face edges is larger than 2
+Edge(348,345): the number of face edges is larger than 2
+Edge(339,344): the number of face edges is larger than 2
+Edge(344,339): the number of face edges is larger than 2
+Edge(341,353): the number of face edges is larger than 2
+Edge(365,364): the number of face edges is larger than 2
+Edge(364,366): the number of face edges is larger than 2
+Edge(366,364): the number of face edges is larger than 2
+Edge(379,367): the number of face edges is larger than 2
+Edge(391,390): the number of face edges is larger than 2
+Edge(390,392): the number of face edges is larger than 2
+Edge(392,390): the number of face edges is larger than 2
+Edge(405,393): the number of face edges is larger than 2
+Edge(417,416): the number of face edges is larger than 2
+Edge(416,426): the number of face edges is larger than 2
+Edge(426,416): the number of face edges is larger than 2
+Edge(423,426): the number of face edges is larger than 2
+Edge(426,423): the number of face edges is larger than 2
+Edge(417,422): the number of face edges is larger than 2
+Edge(422,417): the number of face edges is larger than 2
+Edge(419,431): the number of face edges is larger than 2
+Edge(443,442): the number of face edges is larger than 2
+Edge(442,444): the number of face edges is larger than 2
+Edge(444,442): the number of face edges is larger than 2
+Edge(457,445): the number of face edges is larger than 2
+Edge(457,459): the number of face edges is larger than 2
+Edge(468,469): the number of face edges is larger than 2
+Edge(477,468): the number of face edges is larger than 2
+Edge(474,475): the number of face edges is larger than 2
+Edge(491,492): the number of face edges is larger than 2
+Edge(495,494): the number of face edges is larger than 2
+Edge(494,496): the number of face edges is larger than 2
+Edge(496,494): the number of face edges is larger than 2
+Edge(509,497): the number of face edges is larger than 2
+Edge(521,520): the number of face edges is larger than 2
+Edge(520,522): the number of face edges is larger than 2
+Edge(522,520): the number of face edges is larger than 2
+Edge(535,523): the number of face edges is larger than 2
+Edge(547,546): the number of face edges is larger than 2
+Edge(546,548): the number of face edges is larger than 2
+Edge(548,546): the number of face edges is larger than 2
+Edge(561,549): the number of face edges is larger than 2
+Edge(575,584): the number of face edges is larger than 2
+Edge(590,578): the number of face edges is larger than 2
+Edge(578,577): the number of face edges is larger than 2
+Edge(577,590): the number of face edges is larger than 2
+Edge(590,577): the number of face edges is larger than 2
+Warning! total 124 edges have more than 2 face edges
+Edge(47,49): the number of face edges is larger than 2
+Edge(49,47): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(275,274): the number of face edges is larger than 2
+Edge(274,275): the number of face edges is larger than 2
+Edge(419,338): the number of face edges is larger than 2
+Edge(338,419): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,415): the number of face edges is larger than 2
+Edge(570,414): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,570): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(688,524): the number of face edges is larger than 2
+Edge(524,526): the number of face edges is larger than 2
+Edge(696,695): the number of face edges is larger than 2
+Edge(695,688): the number of face edges is larger than 2
+Edge(1096,1097): the number of face edges is larger than 2
+Edge(1099,1100): the number of face edges is larger than 2
+Edge(1097,1098): the number of face edges is larger than 2
+Edge(1098,1099): the number of face edges is larger than 2
+Warning! total 19 edges have more than 2 face edges
+BoundaryVertex??????
+#dof	25
+#muscle	92
+#dof	25
+#muscle	80
+original f_m_o
+{1:819, 2:573, 3:653, 4:270, 5:285, 6:323, 7:1288, 8:410, 9:896, 10:804, 11:156, 12:627, 13:429, 14:381, 15:343, 16:488, 17:233, 18:266, 19:162, 20:573, 21:819, 22:552, 23:1073, 24:1113, 25:381, 26:164, 27:444, 28:1169, 29:1294, 30:1365, 31:1871, 32:819, 33:573, 34:653, 35:270, 36:285, 37:323, 38:1288, 39:410, 40:896, 41:804, 42:156, 43:627, 44:429, 45:381, 46:343, 47:488, 48:233, 49:266, 50:162, 51:573, 52:819, 53:552, 54:1073, 55:1113, 56:381, 57:164, 58:444, 59:1169, 60:1294, 61:1365, 62:1871, 63:1558, 64:683, 65:3549, 66:1588, 67:310, 68:322, 69:905, 70:435, 71:943, 72:180, 73:512, 74:162, 75:2500, 76:2500, 77:900, 78:900, 79:900, 80:900, }
+Edge(75,73): the number of face edges is larger than 2
+Edge(77,75): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(73,75): the number of face edges is larger than 2
+Edge(75,77): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(88,89): the number of face edges is larger than 2
+Edge(102,88): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(102,89): the number of face edges is larger than 2
+Edge(89,88): the number of face edges is larger than 2
+Edge(88,102): the number of face edges is larger than 2
+Warning! total 3 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(1,0): the number of face edges is larger than 2
+Edge(0,10): the number of face edges is larger than 2
+Edge(10,0): the number of face edges is larger than 2
+Edge(7,10): the number of face edges is larger than 2
+Edge(10,7): the number of face edges is larger than 2
+Edge(1,6): the number of face edges is larger than 2
+Edge(6,1): the number of face edges is larger than 2
+Edge(7,14): the number of face edges is larger than 2
+Edge(27,26): the number of face edges is larger than 2
+Edge(26,36): the number of face edges is larger than 2
+Edge(36,26): the number of face edges is larger than 2
+Edge(33,36): the number of face edges is larger than 2
+Edge(36,33): the number of face edges is larger than 2
+Edge(27,32): the number of face edges is larger than 2
+Edge(32,27): the number of face edges is larger than 2
+Edge(29,41): the number of face edges is larger than 2
+Edge(53,52): the number of face edges is larger than 2
+Edge(52,62): the number of face edges is larger than 2
+Edge(62,52): the number of face edges is larger than 2
+Edge(59,62): the number of face edges is larger than 2
+Edge(62,59): the number of face edges is larger than 2
+Edge(53,58): the number of face edges is larger than 2
+Edge(58,53): the number of face edges is larger than 2
+Edge(55,67): the number of face edges is larger than 2
+Edge(79,78): the number of face edges is larger than 2
+Edge(78,88): the number of face edges is larger than 2
+Edge(88,78): the number of face edges is larger than 2
+Edge(85,88): the number of face edges is larger than 2
+Edge(88,85): the number of face edges is larger than 2
+Edge(79,84): the number of face edges is larger than 2
+Edge(84,79): the number of face edges is larger than 2
+Edge(81,93): the number of face edges is larger than 2
+Edge(105,104): the number of face edges is larger than 2
+Edge(104,114): the number of face edges is larger than 2
+Edge(114,104): the number of face edges is larger than 2
+Edge(111,114): the number of face edges is larger than 2
+Edge(114,111): the number of face edges is larger than 2
+Edge(105,110): the number of face edges is larger than 2
+Edge(110,105): the number of face edges is larger than 2
+Edge(107,119): the number of face edges is larger than 2
+Edge(131,130): the number of face edges is larger than 2
+Edge(130,132): the number of face edges is larger than 2
+Edge(132,130): the number of face edges is larger than 2
+Edge(145,133): the number of face edges is larger than 2
+Edge(157,156): the number of face edges is larger than 2
+Edge(156,158): the number of face edges is larger than 2
+Edge(158,156): the number of face edges is larger than 2
+Edge(171,159): the number of face edges is larger than 2
+Edge(183,182): the number of face edges is larger than 2
+Edge(182,184): the number of face edges is larger than 2
+Edge(184,182): the number of face edges is larger than 2
+Edge(197,185): the number of face edges is larger than 2
+Edge(209,208): the number of face edges is larger than 2
+Edge(208,210): the number of face edges is larger than 2
+Edge(210,208): the number of face edges is larger than 2
+Edge(223,211): the number of face edges is larger than 2
+Edge(235,234): the number of face edges is larger than 2
+Edge(234,236): the number of face edges is larger than 2
+Edge(236,234): the number of face edges is larger than 2
+Edge(249,237): the number of face edges is larger than 2
+Edge(265,260): the number of face edges is larger than 2
+Edge(276,277): the number of face edges is larger than 2
+Edge(287,286): the number of face edges is larger than 2
+Edge(286,288): the number of face edges is larger than 2
+Edge(288,286): the number of face edges is larger than 2
+Edge(301,289): the number of face edges is larger than 2
+Edge(313,312): the number of face edges is larger than 2
+Edge(312,322): the number of face edges is larger than 2
+Edge(322,312): the number of face edges is larger than 2
+Edge(319,322): the number of face edges is larger than 2
+Edge(322,319): the number of face edges is larger than 2
+Edge(313,318): the number of face edges is larger than 2
+Edge(318,313): the number of face edges is larger than 2
+Edge(315,327): the number of face edges is larger than 2
+Edge(339,338): the number of face edges is larger than 2
+Edge(338,348): the number of face edges is larger than 2
+Edge(348,338): the number of face edges is larger than 2
+Edge(345,348): the number of face edges is larger than 2
+Edge(348,345): the number of face edges is larger than 2
+Edge(339,344): the number of face edges is larger than 2
+Edge(344,339): the number of face edges is larger than 2
+Edge(341,353): the number of face edges is larger than 2
+Edge(365,364): the number of face edges is larger than 2
+Edge(364,366): the number of face edges is larger than 2
+Edge(366,364): the number of face edges is larger than 2
+Edge(379,367): the number of face edges is larger than 2
+Edge(391,390): the number of face edges is larger than 2
+Edge(390,392): the number of face edges is larger than 2
+Edge(392,390): the number of face edges is larger than 2
+Edge(405,393): the number of face edges is larger than 2
+Edge(417,416): the number of face edges is larger than 2
+Edge(416,426): the number of face edges is larger than 2
+Edge(426,416): the number of face edges is larger than 2
+Edge(423,426): the number of face edges is larger than 2
+Edge(426,423): the number of face edges is larger than 2
+Edge(417,422): the number of face edges is larger than 2
+Edge(422,417): the number of face edges is larger than 2
+Edge(419,431): the number of face edges is larger than 2
+Edge(443,442): the number of face edges is larger than 2
+Edge(442,444): the number of face edges is larger than 2
+Edge(444,442): the number of face edges is larger than 2
+Edge(457,445): the number of face edges is larger than 2
+Edge(457,459): the number of face edges is larger than 2
+Edge(468,469): the number of face edges is larger than 2
+Edge(477,468): the number of face edges is larger than 2
+Edge(474,475): the number of face edges is larger than 2
+Edge(491,492): the number of face edges is larger than 2
+Edge(495,494): the number of face edges is larger than 2
+Edge(494,496): the number of face edges is larger than 2
+Edge(496,494): the number of face edges is larger than 2
+Edge(509,497): the number of face edges is larger than 2
+Edge(521,520): the number of face edges is larger than 2
+Edge(520,522): the number of face edges is larger than 2
+Edge(522,520): the number of face edges is larger than 2
+Edge(535,523): the number of face edges is larger than 2
+Edge(547,546): the number of face edges is larger than 2
+Edge(546,548): the number of face edges is larger than 2
+Edge(548,546): the number of face edges is larger than 2
+Edge(561,549): the number of face edges is larger than 2
+Edge(575,584): the number of face edges is larger than 2
+Edge(590,578): the number of face edges is larger than 2
+Edge(578,577): the number of face edges is larger than 2
+Edge(577,590): the number of face edges is larger than 2
+Edge(590,577): the number of face edges is larger than 2
+Warning! total 124 edges have more than 2 face edges
+Edge(47,49): the number of face edges is larger than 2
+Edge(49,47): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(275,274): the number of face edges is larger than 2
+Edge(274,275): the number of face edges is larger than 2
+Edge(419,338): the number of face edges is larger than 2
+Edge(338,419): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,415): the number of face edges is larger than 2
+Edge(570,414): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,570): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(688,524): the number of face edges is larger than 2
+Edge(524,526): the number of face edges is larger than 2
+Edge(696,695): the number of face edges is larger than 2
+Edge(695,688): the number of face edges is larger than 2
+Edge(1096,1097): the number of face edges is larger than 2
+Edge(1099,1100): the number of face edges is larger than 2
+Edge(1097,1098): the number of face edges is larger than 2
+Edge(1098,1099): the number of face edges is larger than 2
+Warning! total 19 edges have more than 2 face edges
+BoundaryVertex??????
+533	533
+Edge(75,73): the number of face edges is larger than 2
+Edge(77,75): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(73,75): the number of face edges is larger than 2
+Edge(75,77): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(88,89): the number of face edges is larger than 2
+Edge(102,88): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(102,89): the number of face edges is larger than 2
+Edge(89,88): the number of face edges is larger than 2
+Edge(88,102): the number of face edges is larger than 2
+Warning! total 3 edges have more than 2 face edges
+warning! selectFacesFromVertices!!!
+Edge(1,0): the number of face edges is larger than 2
+Edge(0,10): the number of face edges is larger than 2
+Edge(10,0): the number of face edges is larger than 2
+Edge(7,10): the number of face edges is larger than 2
+Edge(10,7): the number of face edges is larger than 2
+Edge(1,6): the number of face edges is larger than 2
+Edge(6,1): the number of face edges is larger than 2
+Edge(7,14): the number of face edges is larger than 2
+Edge(27,26): the number of face edges is larger than 2
+Edge(26,36): the number of face edges is larger than 2
+Edge(36,26): the number of face edges is larger than 2
+Edge(33,36): the number of face edges is larger than 2
+Edge(36,33): the number of face edges is larger than 2
+Edge(27,32): the number of face edges is larger than 2
+Edge(32,27): the number of face edges is larger than 2
+Edge(29,41): the number of face edges is larger than 2
+Edge(53,52): the number of face edges is larger than 2
+Edge(52,62): the number of face edges is larger than 2
+Edge(62,52): the number of face edges is larger than 2
+Edge(59,62): the number of face edges is larger than 2
+Edge(62,59): the number of face edges is larger than 2
+Edge(53,58): the number of face edges is larger than 2
+Edge(58,53): the number of face edges is larger than 2
+Edge(55,67): the number of face edges is larger than 2
+Edge(79,78): the number of face edges is larger than 2
+Edge(78,88): the number of face edges is larger than 2
+Edge(88,78): the number of face edges is larger than 2
+Edge(85,88): the number of face edges is larger than 2
+Edge(88,85): the number of face edges is larger than 2
+Edge(79,84): the number of face edges is larger than 2
+Edge(84,79): the number of face edges is larger than 2
+Edge(81,93): the number of face edges is larger than 2
+Edge(105,104): the number of face edges is larger than 2
+Edge(104,114): the number of face edges is larger than 2
+Edge(114,104): the number of face edges is larger than 2
+Edge(111,114): the number of face edges is larger than 2
+Edge(114,111): the number of face edges is larger than 2
+Edge(105,110): the number of face edges is larger than 2
+Edge(110,105): the number of face edges is larger than 2
+Edge(107,119): the number of face edges is larger than 2
+Edge(131,130): the number of face edges is larger than 2
+Edge(130,132): the number of face edges is larger than 2
+Edge(132,130): the number of face edges is larger than 2
+Edge(145,133): the number of face edges is larger than 2
+Edge(157,156): the number of face edges is larger than 2
+Edge(156,158): the number of face edges is larger than 2
+Edge(158,156): the number of face edges is larger than 2
+Edge(171,159): the number of face edges is larger than 2
+Edge(183,182): the number of face edges is larger than 2
+Edge(182,184): the number of face edges is larger than 2
+Edge(184,182): the number of face edges is larger than 2
+Edge(197,185): the number of face edges is larger than 2
+Edge(209,208): the number of face edges is larger than 2
+Edge(208,210): the number of face edges is larger than 2
+Edge(210,208): the number of face edges is larger than 2
+Edge(223,211): the number of face edges is larger than 2
+Edge(235,234): the number of face edges is larger than 2
+Edge(234,236): the number of face edges is larger than 2
+Edge(236,234): the number of face edges is larger than 2
+Edge(249,237): the number of face edges is larger than 2
+Edge(265,260): the number of face edges is larger than 2
+Edge(276,277): the number of face edges is larger than 2
+Edge(287,286): the number of face edges is larger than 2
+Edge(286,288): the number of face edges is larger than 2
+Edge(288,286): the number of face edges is larger than 2
+Edge(301,289): the number of face edges is larger than 2
+Edge(313,312): the number of face edges is larger than 2
+Edge(312,322): the number of face edges is larger than 2
+Edge(322,312): the number of face edges is larger than 2
+Edge(319,322): the number of face edges is larger than 2
+Edge(322,319): the number of face edges is larger than 2
+Edge(313,318): the number of face edges is larger than 2
+Edge(318,313): the number of face edges is larger than 2
+Edge(315,327): the number of face edges is larger than 2
+Edge(339,338): the number of face edges is larger than 2
+Edge(338,348): the number of face edges is larger than 2
+Edge(348,338): the number of face edges is larger than 2
+Edge(345,348): the number of face edges is larger than 2
+Edge(348,345): the number of face edges is larger than 2
+Edge(339,344): the number of face edges is larger than 2
+Edge(344,339): the number of face edges is larger than 2
+Edge(341,353): the number of face edges is larger than 2
+Edge(365,364): the number of face edges is larger than 2
+Edge(364,366): the number of face edges is larger than 2
+Edge(366,364): the number of face edges is larger than 2
+Edge(379,367): the number of face edges is larger than 2
+Edge(391,390): the number of face edges is larger than 2
+Edge(390,392): the number of face edges is larger than 2
+Edge(392,390): the number of face edges is larger than 2
+Edge(405,393): the number of face edges is larger than 2
+Edge(417,416): the number of face edges is larger than 2
+Edge(416,426): the number of face edges is larger than 2
+Edge(426,416): the number of face edges is larger than 2
+Edge(423,426): the number of face edges is larger than 2
+Edge(426,423): the number of face edges is larger than 2
+Edge(417,422): the number of face edges is larger than 2
+Edge(422,417): the number of face edges is larger than 2
+Edge(419,431): the number of face edges is larger than 2
+Edge(443,442): the number of face edges is larger than 2
+Edge(442,444): the number of face edges is larger than 2
+Edge(444,442): the number of face edges is larger than 2
+Edge(457,445): the number of face edges is larger than 2
+Edge(457,459): the number of face edges is larger than 2
+Edge(468,469): the number of face edges is larger than 2
+Edge(477,468): the number of face edges is larger than 2
+Edge(474,475): the number of face edges is larger than 2
+Edge(491,492): the number of face edges is larger than 2
+Edge(495,494): the number of face edges is larger than 2
+Edge(494,496): the number of face edges is larger than 2
+Edge(496,494): the number of face edges is larger than 2
+Edge(509,497): the number of face edges is larger than 2
+Edge(521,520): the number of face edges is larger than 2
+Edge(520,522): the number of face edges is larger than 2
+Edge(522,520): the number of face edges is larger than 2
+Edge(535,523): the number of face edges is larger than 2
+Edge(547,546): the number of face edges is larger than 2
+Edge(546,548): the number of face edges is larger than 2
+Edge(548,546): the number of face edges is larger than 2
+Edge(561,549): the number of face edges is larger than 2
+Edge(575,584): the number of face edges is larger than 2
+Edge(590,578): the number of face edges is larger than 2
+Edge(578,577): the number of face edges is larger than 2
+Edge(577,590): the number of face edges is larger than 2
+Edge(590,577): the number of face edges is larger than 2
+Warning! total 124 edges have more than 2 face edges
+Edge(47,49): the number of face edges is larger than 2
+Edge(49,47): the number of face edges is larger than 2
+Warning! total 2 edges have more than 2 face edges
+Edge(275,274): the number of face edges is larger than 2
+Edge(274,275): the number of face edges is larger than 2
+Edge(419,338): the number of face edges is larger than 2
+Edge(338,419): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,415): the number of face edges is larger than 2
+Edge(570,414): the number of face edges is larger than 2
+Edge(571,414): the number of face edges is larger than 2
+Edge(414,570): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(419,490): the number of face edges is larger than 2
+Edge(688,524): the number of face edges is larger than 2
+Edge(524,526): the number of face edges is larger than 2
+Edge(696,695): the number of face edges is larger than 2
+Edge(695,688): the number of face edges is larger than 2
+Edge(1096,1097): the number of face edges is larger than 2
+Edge(1099,1100): the number of face edges is larger than 2
+Edge(1097,1098): the number of face edges is larger than 2
+Edge(1098,1099): the number of face edges is larger than 2
+Warning! total 19 edges have more than 2 face edges
+BoundaryVertex??????
+../Resource/motion/opensim/gait25_gait_repeat.zmpcom
+addModel untitled
+Box size 0.03 0.03 0.03
+Box size 0.04 1.7 0.04
+Cart	Pole
+1	59.999663	0.947889	13.643121
+Info:	{
+ {[0]={0.000, 0.000, 1.000, 0.000, }
+ {[1]={0.000, 0.000, 0.000, 1.000, }
+ {[2]={-0.000, 35.772, -0.000, -0.000, }
+ {[3]={-0.000, 38.367, -0.000, -0.000, }
+}
+	{
+ {[0]={0.000, }
+ {[1]={0.000, }
+ {[2]={0.076, }
+ {[3]={0.064, }
+}
+	{
+ {[0]={0.000, 0.000, 0.000, 0.000, }
+ {[1]={0.000, 30000.000, 0.000, 0.000, }
+ {[2]={0.000, 0.000, 30000.000, 0.000, }
+ {[3]={0.000, 0.000, 0.000, 0.000, }
+}
+	{
+ {[0]={1.000, }
+}
+	{
+ {[0]={0.000, 2080.019, -173.205, 533.054, }
+}
+
+Info:	{
+ {[0]={0.000, 0.000, 1.000, 0.000, }
+ {[1]={0.000, 0.000, 0.000, 1.000, }
+ {[2]={-0.000, 35.772, -0.000, -0.000, }
+ {[3]={-0.000, 38.367, -0.000, -0.000, }
+}
+	{
+ {[0]={0.000, }
+ {[1]={0.000, }
+ {[2]={0.076, }
+ {[3]={0.064, }
+}
+	{
+ {[0]={0.000, 0.000, 0.000, 0.000, }
+ {[1]={0.000, 30000.000, 0.000, 0.000, }
+ {[2]={0.000, 0.000, 30000.000, 0.000, }
+ {[3]={0.000, 0.000, 0.000, 0.000, }
+}
+	{
+ {[0]={1.000, }
+}
+	{
+ {[0]={0.000, 2080.019, -173.205, 533.054, }
+}
+
+Box size 0.03 0.03 0.03
+Box size 0.04 1.7 0.04
+Cart	Pole
+1	59.999663	0.947889	13.643121
+graph
+ground_pelvis numSubmesh 3
+knee_r numSubmesh 2
+ankle_r numSubmesh 12
+mtp_r numSubmesh 14
+knee_l numSubmesh 2
+ankle_l numSubmesh 12
+mtp_l numSubmesh 14
+back numSubmesh 28
+111
+111
+111
+111
+111
+111
+111
+111
+111
+111
+1
+setSeg	g2592_gait_art_leg	l
+setSeg	g2592_gait_art_leg	r
+setSeg	g2592_gait_art_leg	L1
+setSeg	g2592_gait_art_leg	R1
+setSeg	g2592_gait_art_leg	L2
+Physics start
+addModel untitled
+111
+111
+111
+111
+111
+111
+111
+111
+111
+111
+Box size 380 0.2 380
+addModel ___uniq97
+addModel untitled
+111
+111
+111
+111
+111
+111
+111
+111
+111
+111
+kp=	[]
+kd=	[]
+constructor end

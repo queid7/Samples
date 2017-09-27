@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jo/Share/taesooLib/Samples/classification/cma/cmaes.c
+math.h
+-
+stddef.h
+-
+stdlib.h
+-
+string.h
+-
+stdio.h
+-
+cmaes_interface.h
+/home/jo/Share/taesooLib/Samples/classification/cma/cmaes_interface.h
+
+/home/jo/Share/taesooLib/Samples/classification/cma/cmaes.h
+time.h
+-
+
+/home/jo/Share/taesooLib/Samples/classification/cma/cmaes_interface.h
+cmaes.h
+/home/jo/Share/taesooLib/Samples/classification/cma/cmaes.h
+
